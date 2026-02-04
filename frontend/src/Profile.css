@@ -1,0 +1,126 @@
+.profile-main-div {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 30px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.profile-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 26px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.profile-email {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.profile-details {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap:25px;
+}
+
+.detail-item span {
+  font-size: 12px;
+  color: #888;
+}
+
+.detail-item p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.in {
+  color: #1aaa6f;
+}
+
+.status.out {
+  color: #e74c3c;
+}
+
+.stats-container {
+  display: flex;
+  gap: 20px;
+  max-width: 480px;
+  margin: 15px auto;
+}
+
+/* Glass card */
+.stat-card {
+  flex: 1;
+  height: 120px;
+  padding: 16px;
+  border-radius: 14px;
+
+  background: rgba(230, 242, 255, 0.6);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(180, 210, 255, 0.6);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  transition: transform 0.2s ease;
+}
+
+/* Title (top) */
+.stat-card h3 {
+  margin: 0px auto;
+  font-size: 20px;
+  font-weight: 600;
+  color: #355c8a;
+}
+
+/* Number (center + bottom) */
+.stat-card p {
+  margin: 0;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 700;
+  color: #1f3c6d;
+  padding-bottom: 6px;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .stats-container {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,272 @@
+.login-main-div{
+    height:80vh;
+    width:80vw;
+    margin:auto;
+    margin-top:10vh;
+    display:flex;
+    transition:all 1s ease;
+    background-color: rgb(255, 255, 255);
+    justify-content: center;
+}
+.login-outer-div{
+    background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+    height:100vh;
+    overflow: hidden;
+}
+.left-div{
+    background-color:#0099ff;
+    height:100%;
+    width:40vw;
+    transition: all 1s ease;
+    border-bottom-right-radius: 10%;
+    border-top-right-radius: 10%;
+    z-index: 2;
+}
+@media (max-width:600px){
+    .left-div{
+        display: none;
+    }
+    .login-main-div{
+        height:80vh;
+    }
+}
+@media (min-width:601px){
+    .left-div.swapped{
+    transform: translateX(40vw);
+    border-bottom-right-radius: 0%;
+    border-top-right-radius: 0%;
+    border-bottom-left-radius: 10%;
+    border-top-left-radius: 10%;
+}
+.right-div.swapped{
+    transform:translatex(-40vw);
+}
+
+}
+.right-div{
+    background-color:white;
+    height:100%;
+    width:40vw;
+    transition: all 1s ease;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+.right-div .login{
+    opacity:1;
+    transition: all 0.5s ease;
+    width:100%;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+.right-div.swapped .login{
+    visibility: hidden;
+    opacity:0;
+    height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.right-div .signup{
+    opacity:0;
+    visibility: hidden;
+    width:100%;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.right-div.swapped .signup{
+    opacity:1;
+    transition:all 0.5s ease;
+    visibility: visible;
+    height:100%;
+}
+
+.left-div .login{
+    color:rgb(255, 255, 255);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height:100%;
+    opacity:1;
+
+}
+.left-div.swapped .login{
+    visibility: hidden;
+    opacity:0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+.left-div .signup{
+    color:rgb(255, 255, 255);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+}
+.left-div.swapped .signup{
+    opacity:1;
+    visibility: visible;
+    height:100%;
+}
+
+/* Title */
+.login-title {
+  margin-bottom: 30px;
+  color:  #44b4ff;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+/* Input container */
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* Input field */
+.input-group input {
+  padding: 10px 5px;
+  font-size: 20px;
+  border: none;
+  border-bottom: 2px solid #aaa;
+  background: transparent;
+  outline: none;
+  color: #333;
+}
+
+/* Label (floating animation) */
+.input-group label {
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  color: #777;
+  pointer-events: none;
+  transition: 0.3s ease all;
+  font-size: 20px;
+}
+
+/* When input is focused or has text */
+.input-group input:focus ~ label,
+.input-group input:valid ~ label {
+  top: -12px;
+  font-size: 16px;
+  color: #3498db;
+}
+
+/* Underline animation */
+.input-group input:focus {
+  border-bottom: 2px solid #3498db;
+}
+
+/* Button styling */
+.login-btn {
+  padding: 12px 0;
+  background: #44b4ff;
+  color: #fff;
+  font-size: 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  width:35%;
+}
+
+.login-btn:hover {
+  background: #3c8fc7;
+}
+
+.sign-up-note{
+    color:grey;
+}
+.sign-up-note span{
+    color:#0099ff;
+}
+
+.sign-up-note span:hover{
+    color:#0062ff;
+    cursor: pointer;
+    border-bottom: 1.5px solid #0062ffb1;
+}
+
+.left-div button{
+    font-size: 23px;
+    border:none;
+    border-radius: 10px;
+    padding:5px;
+    width:25%;
+    color:#0099ff;
+    transition: all 0.3s ease;
+}
+.left-div button:hover{
+    transform: translateY(-5px);
+    box-shadow: 0px 2px 10px 4px rgb(255, 255, 255);
+}
+
+.pass-notmatch-note{
+    color:red;
+    font-size:14px;
+    display:none;
+    transition: all 0.3s ease;
+}
+.pass-notmatch-note.show{
+    display:block;
+}
+
+.emailerr{
+    color:red;
+    font-size:14px;
+    display:none;
+    transition: all 0.3s ease;
+}
+.emailerr.show{
+    display:block;
+}
+
+
+/* acedemic details select section css */
+
+/* Container */
+.acedamic-details-div {
+  display:flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  
+}
+
+/* Common select styling */
+.degree-select,
+.branch-select,
+.year-select {
+  width:30%;
+  padding: 3px 0px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  border-radius: 8px;
+  border:2px solid #7777779e;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.degree-select:focus,
+.branch-select:focus,
+.year-select:focus {
+  border:2px solid #3bb1ff;
+}
+.degree-select:hover,
+.branch-select:hover,
+.year-select:hover {
+  border:2px solid #3bb1ff;
+}
+select option {
+  padding:8px;
+  font-size: 14px;
+}

@@ -1,0 +1,479 @@
+.addrequest-outer-div {
+    overflow-y: scroll;
+    height: 100vh;
+    width: 100vw;
+}
+
+.addrequest-outer-div::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.addreq-top-div {
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 20px;
+    border-bottom: 2px solid #255fabb7;
+    background-color: #f5f5f59d;
+    height: 80px;
+}
+
+.addreq-top-right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+}
+
+.addreq-top-right button {
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 5px 10px;
+    text-align: center;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.post-req-btn {
+    background-color: rgb(66, 189, 0);
+    color: white;
+}
+
+.post-req-btn:hover {
+    background-color: rgb(54, 134, 10);
+    scale: 1.05;
+}
+
+.post-req-btn:active {
+    scale: 0.8;
+}
+
+.cancel-req-btn {
+    background-color: rgb(73, 73, 73);
+    color: white;
+}
+
+.cancel-req-btn:hover {
+    background-color: rgb(0, 0, 0);
+    scale: 1.05;
+}
+
+.cancel-req-btn:active {
+    scale: 0.8;
+}
+
+.adding-item-div {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 2px solid blue;
+    margin-bottom: 10px;
+
+}
+
+.adding-inputs-div {
+    display: flex;
+    gap: 20px;
+    margin: 5px;
+}
+
+.adding-inputs-div input {
+    width: 20%;
+    height: 20px;
+    font-size: 20px;
+    border: 2px solid rgba(181, 181, 181, 0.68);
+    border-radius: 5px;
+    padding: 5px 5px;
+    color: rgba(41, 40, 40, 0.941);
+    transition: all 0.4s ease;
+}
+
+.adding-inputs-div input:focus {
+    outline: none;
+    border-color: blue;
+}
+
+.item-des {
+    resize: none;
+    width: 70%;
+    margin: 0px 5px;
+    height: 40px;
+    border: 2px solid rgba(181, 181, 181, 0.68);
+    border-radius: 5px;
+    padding: 5px 5px;
+    color: rgba(41, 40, 40, 0.941);
+    font-size: 20px;
+    transition: all 0.6s ease;
+    margin-bottom: 7px;
+}
+
+.item-des:focus {
+    outline: none;
+    border-color: blue;
+    ;
+}
+
+.add-item-btn {
+    font-size: 20px;
+    border: none;
+    background-color: rgb(10, 10, 255);
+    color: white;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.add-item-btn:hover {
+    background-color: rgb(13, 13, 151);
+}
+
+.add-item-btn:active {
+    scale: 0.9;
+}
+
+.list-items-div {
+    margin: 4px 8px;
+    padding: 3px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: rgb(255, 239, 196);
+    border-radius: 8px;
+    position: relative;
+}
+
+.list-items-div p {
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 600;
+}
+
+.list-items-div p span {
+    color: rgb(255, 140, 0);
+    font-size: 22px;
+}
+
+.item-content-ps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10%;
+}
+
+.items-modify-btns-div {
+    position: absolute;
+    right: 20px;
+    top: 40%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    transform: translateX(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.list-items-div:hover .items-modify-btns-div {
+    opacity: 1;
+    transform: translateX(0px);
+}
+
+.items-modify-btns-div button {
+    font-size: 17px;
+    padding: 5px;
+    border-radius: 10px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.574);
+    transition: all 0.2s ease;
+}
+
+.edit-item-btn:hover {
+    background-color: rgb(0, 255, 0);
+    color: white;
+}
+
+.delete-item-btn:hover {
+    background-color: rgb(255, 1, 1);
+    color: white;
+}
+
+.pop-up-edit-div {
+    position: fixed;
+    height: 70vh;
+    width: 80vw;
+    max-width: 500px;
+    background-color: white;
+    z-index: 20;
+    top: 10vh;
+    left: 50vw;
+    transform: translate(-50%, 0%);
+    border-radius: 10px;
+    box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.432);
+}
+
+.pop-up-edit-div {
+    display: none;
+    padding: 10px;
+}
+
+.pop-up-edit-div.show {
+    display: block;
+}
+
+.pop-up-edit-div input {
+    width: 70%;
+    height: 30px;
+    font-size: 20px;
+    border: 2px solid rgba(181, 181, 181, 0.68);
+    border-radius: 5px;
+    padding: 5px 5px;
+    color: rgba(41, 40, 40, 0.941);
+    margin: 10px 10%;
+    transition: all 0.4s ease;
+}
+
+.pop-up-edit-div input:focus {
+    outline: none;
+    border-color: blue;
+}
+
+.pop-up-edit-div textarea {
+    width: 70%;
+    height: 60px;
+    font-size: 20px;
+    border: 2px solid rgba(181, 181, 181, 0.68);
+    border-radius: 5px;
+    padding: 5px 5px;
+    color: rgba(41, 40, 40, 0.941);
+    margin: 10px 10%;
+    resize: none;
+    transition: all 0.4s ease;
+}
+
+.pop-up-edit-div textarea:focus {
+    outline: none;
+    border-color: blue;
+}
+
+.blurscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(62, 62, 62, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: "blur(8px)";
+    z-index: 10;
+    display: none;
+}
+
+.blurscreen.show {
+    display: block;
+}
+
+.edit-save-btn {
+    font-size: 25px;
+    border: none;
+    background-color: rgb(10, 10, 255);
+    color: white;
+    font-weight: 600;
+    padding: 5px 15px;
+    border-radius: 10px;
+    display: block;
+    margin: 5px auto;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-save-btn:hover {
+    background-color: rgb(0, 0, 201);
+}
+
+.edit-cancel-btn {
+    font-size: 25px;
+    border: none;
+    background-color: rgb(68, 68, 68);
+    color: white;
+    font-weight: 600;
+    padding: 5px 15px;
+    border-radius: 10px;
+    display: block;
+    margin: 5px auto;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-cancel-btn:hover {
+    background-color: rgb(29, 29, 29);
+}
+
+.edit-btns-div {
+    margin-top: 20px;
+    display: flex;
+    margin-right: 20px;
+}
+
+.pop-up-note {
+    background-color: rgb(255, 255, 255);
+    height: 170px;
+    width: 80vw;
+    max-width: 400px;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    position: fixed;
+    z-index: 100;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    gap: 25%;
+}
+
+.pop-up-note.show {
+    display: flex;
+}
+
+.pop-up-note p {
+    font-size: 24px;
+    font-weight: 600;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: rgb(208, 19, 19);
+    margin-top: 20px;
+}
+
+.pop-up-note-btns {
+    display: flex;
+    justify-content: space-around;
+}
+
+.pop-up-note-btns button {
+    border-radius: 5px;
+    font-size: 25px;
+    font-weight: 600;
+    padding: 5px 10px;
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.edit-note-con-btn {
+    background-color: rgb(5, 5, 232);
+}
+
+.edit-note-con-btn:hover {
+    background-color: rgb(0, 0, 178);
+    cursor: pointer;
+}
+
+.edit-note-cancel-btn {
+    background-color: rgb(82, 82, 82);
+}
+
+.edit-note-cancel-btn:hover {
+    background-color: rgb(27, 27, 27);
+    cursor: pointer;
+}
+
+.items-top-ps {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 30px;
+    padding-left: 5px;
+}
+
+.total-cost-p {
+    font-size: 20px;
+}
+
+.total-cost-p span {
+    font-weight: 600;
+    color: rgb(46, 46, 255);
+}
+
+
+.post-req-note {
+    background-color: rgb(255, 255, 255);
+    height: 60vh;
+    width: 80vw;
+    max-width: 450px;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    position: fixed;
+    z-index: 100;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    gap: 1%;
+    display: none;
+}
+
+.post-req-note.show {
+    display: flex;
+}
+
+.post-req-note p {
+    font-size: 20px;
+    font-weight: 600;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: rgb(38, 114, 255);
+    margin-top: 10px;
+}
+
+.post-req-note-btns {
+    display: flex;
+    justify-content: space-around;
+}
+
+.post-req-note-btns button {
+    border-radius: 5px;
+    font-size: 25px;
+    font-weight: 600;
+    padding: 5px 10px;
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.post-req-con-btn {
+    background-color: rgb(5, 5, 232);
+}
+
+.post-req-con-btn:hover {
+    background-color: rgb(0, 0, 178);
+    cursor: pointer;
+}
+
+.post-req-cancel-btn {
+    background-color: rgb(82, 82, 82);
+}
+
+.post-req-cancel-btn:hover {
+    background-color: rgb(27, 27, 27);
+    cursor: pointer;
+}
+
+.post-req-note textarea {
+    width: 70%;
+    height: 60px;
+    font-size: 20px;
+    border: 2px solid rgba(181, 181, 181, 0.68);
+    border-radius: 5px;
+    padding: 5px 5px;
+    color: rgba(41, 40, 40, 0.941);
+    margin: 10px auto;
+    resize: none;
+    transition: all 0.4s ease;
+}
+
+.post-req-note textarea:focus {
+    outline: none;
+    border-color: blue;
+}
