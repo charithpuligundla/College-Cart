@@ -91,6 +91,7 @@ function Login() {
         }).then(response => {
             console.log(response);
             localStorage.setItem("userId", response.data.user._id);
+            localStorage.setItem("token",response.data.token);
             navigate('/home');
         })
             .catch(error => {
@@ -114,6 +115,7 @@ function Login() {
             password: loginData.password
         }).then(response => {
             localStorage.setItem("userId", response.data.user._id);
+            localStorage.setItem("token",response.data.token);
             navigate('/home');
         }
         )
@@ -137,7 +139,7 @@ function Login() {
                     <div className="signup">
                         <h1>Welcome to Portify</h1>
                         <p>SignUp and Explore the beatiful world</p>
-                        <p>portify is an amazing platform where you can have your best portifolio</p>
+                        <p>portify is an amazing platform  where you can have your best portifolio</p>
                         <button
                             onClick={swap}
                         >Login</button>

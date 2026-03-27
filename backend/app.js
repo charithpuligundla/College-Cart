@@ -17,8 +17,9 @@ app.use(cors());
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const mongodburl=process.env.MONGODBURL;
 
-mongoose.connect('mongodb+srv://charithpuligundla:Charith%402007@cherrycluster.0s50tpu.mongodb.net/collegeCart?retryWrites=true&w=majority&appName=cherryCluster')
+mongoose.connect(mongodburl)
   .then(() => console.log('mongodb connected'))
   .catch(err => console.log('connection failed', err));
 
@@ -38,6 +39,26 @@ const transporter = nodemailer.createTransport({
 });
 
 
+const protect = (req, res, next) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      req.user = decoded;
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Not authorized, token failed" });
+    }
+  }
+
+  if (!token) {
+    return res.status(401).json({ message: "No token, authorization denied" });
+  }
+};
+
+
 app.post('/signup', async (req, res) => {
   const { userName, email, password } = req.body;
   try {
@@ -55,11 +76,7 @@ app.post('/signup', async (req, res) => {
     });
     await newUser.save();
 
-    const token = jwt.sign(
-      { userId: newUser._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    const token = jwt.sign({ id: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: '30d' });
 
     const verifyLink = `http://localhost:5000/verify-email/${token}`;
 
@@ -73,7 +90,7 @@ app.post('/signup', async (req, res) => {
       `
     });
 
-    res.status(200).json({ message: "Verification email sent", user: newUser });
+    res.status(200).json({ message: "Verification email sent", token, user: newUser });
   }
   catch (err) {
     res.status(500).json({ message: 'Something went wrong', error: err.message });
@@ -92,7 +109,7 @@ app.post('/login', async (req, res) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(400).send('invalid password');
 
-  const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
 
   res.status(200).json({ message: 'login sucessful', token, user: user });
 });
@@ -109,6 +126,10 @@ app.get("/verify-email/:token", async (req, res) => {
     res.status(400).send("Invalid or expired link ❌");
   }
 });
+
+
+app.use(protect);
+
 
 app.post('/getuser', async (req, res) => {
   const { profileId } = req.body;
@@ -179,15 +200,160 @@ app.post('/myaccepts', async (req, res) => {
   }
 })
 
+app.post('/reject-request/:requestId', async (req, res) => {
+  const { accepterId, requesterId } = req.body;
+  if (!accepterId || !requesterId) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const request = await Request.findById(req.params.requestId);
+  if (!request) return res.status(404).json({ message: 'Request not found' });
+
+  let chat = await Chat.findOne({
+    requestId: request._id
+  });
+
+  if (chat) {
+    await chat.deleteOne();
+  }
+
+  request.rejected.push(accepterId);
+  request.acceptedBy = null;
+  request.status = 'pending';
+  request.chatId = null;
+  await request.save();
+  const accepter = await User.findById(accepterId);
+  const requester = await User.findById(requesterId);
+
+  const email1 = requester.email;
+  await transporter.sendMail({
+    to: email1,
+    subject: "Request rejected",
+    html: `
+        <p>your request has been rejected by ${accepter.userName} go to the website to know more.</p>
+        <p>Be lazy be happy</p>
+      `
+  });
+  const email2 = accepter.email;
+  await transporter.sendMail({
+    to: email2,
+    subject: "Request rejected",
+    html: `
+        <p>you rejected the request posted by ${requester.userName}.</p>
+        <p>Be lazy be happy</p>
+      `
+  });
+  res.status(200).json({ message: "Request rejected successfully" });
+});
+
+app.post('/you-rejected/:requestId', async (req, res) => {
+  const { accepterId, requesterId } = req.body;
+
+  if (!accepterId || !requesterId) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+
+  const request = await Request.findById(req.params.requestId);
+  if (!request) return res.status(404).json({ message: 'Request not found' });
+
+  let chat = await Chat.findOne({
+    requestId: request._id
+  });
+
+  if (chat) {
+    await chat.deleteOne();
+  }
+
+  request.rejected.push(accepterId);
+  request.acceptedBy = null;
+  request.status = 'pending';
+  request.chatId = null;
+  await request.save();
+  const accepter = await User.findById(accepterId);
+  const requester = await User.findById(requesterId);
+
+  const email1 = requester.email;
+  await transporter.sendMail({
+    to: email1,
+    subject: "rejected delivery",
+    html: `
+        <p>you rejected ${accepter.userName} as delivery person</p>
+        <p>Be lazy be happy</p>
+      `
+  });
+  const email2 = accepter.email;
+  await transporter.sendMail({
+    to: email2,
+    subject: "rejected delivery",
+    html: `
+        <p>you have been rejected as delivery person by ${requester.userName}.</p>
+        <p>Be lazy be happy</p>
+      `
+  });
+  res.status(200).json({ message: "Request rejected successfully" });
+});
+
+app.post('/delivered/:requestId', async (req, res) => {
+  const { accepterId, requesterId } = req.body;
+
+  if (!accepterId || !requesterId) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const request = await Request.findById(req.params.requestId);
+  if (!request) return res.status(404).json({ message: 'Request not found' });
+
+  let chat = await Chat.findOne({
+    requestId: request._id
+  });
+
+  if (chat) {
+    await chat.deleteOne();
+  }
+
+  request.status = 'delivered';
+  request.chatId = null;
+  await request.save();
+  const accepter = await User.findById(accepterId);
+  const requester = await User.findById(requesterId);
+
+  await User.findByIdAndUpdate(accepterId, {
+    $inc: { no_accepted: 1 }
+  });
+
+  const email1 = requester.email;
+  await transporter.sendMail({
+    to: email1,
+    subject: "your order delivered",
+    html: `
+        <p>your order deleverd by ${accepter.userName}</p>
+        <p>Be lazy be happy</p>
+      `
+  });
+  const email2 = accepter.email;
+  await transporter.sendMail({
+    to: email2,
+    subject: "order delivered",
+    html: `
+        <p>you have been delivered order for ${requester.userName}.</p>
+        <p>Be lazy be happy</p>
+      `
+  });
+  res.status(200).json({ message: "Order deliverd successfully" });
+});
+
 app.post('/accept-request/:requestId', async (req, res) => {
   const { accepterId, requesterId } = req.body;
 
   const request = await Request.findById(req.params.requestId);
   if (!request) return res.status(404).json({ message: 'Request not found' });
 
-  request.acceptedBy = accepterId;
-  request.status = 'accepted';
-  await request.save(); 
+  if (request.rejected.includes(accepterId)) {
+    return res.status(400).json({
+      message: "You have already rejected this request"
+    });
+  }
 
   // check if chat already exists
   let chat = await Chat.findOne({
@@ -201,6 +367,10 @@ app.post('/accept-request/:requestId', async (req, res) => {
     });
   }
 
+  request.acceptedBy = accepterId;
+  request.status = 'accepted';
+  request.chatId = chat._id;
+  await request.save();
 
   const user = await User.findById(requesterId);
   const email = user.email;
@@ -208,13 +378,38 @@ app.post('/accept-request/:requestId', async (req, res) => {
     to: email,
     subject: "Request Accepted",
     html: `
-        <p>you requeste has been accepted go to the website and make payment to procced.</p>
+        <p>your request has been accepted go to the website and make payment to procced.</p>
         <p>Be lazy be happy</p>
       `
   });
 
 
   res.json({ chatId: chat._id });
+});
+
+app.post('/cancel-request/:requestId', async (req, res) => {
+  const { requesterId } = req.body;
+
+  const request = await Request.findById(req.params.requestId);
+  if (!request) return res.status(404).json({ message: 'Request not found' });
+
+  if (request.status != "pending") return res.status(401).json({ message: 'Request cant be cancelled' });
+
+  request.status = 'cancelled';
+  await request.save();
+
+  const user = await User.findById(requesterId);
+  const email = user.email;
+  await transporter.sendMail({
+    to: email,
+    subject: "cancel Request",
+    html: `
+        <p>you cancelled your request go to the website to know more.</p>
+        <p>Be lazy be happy</p>
+      `
+  });
+
+  res.status(200).json({ message: "Request cancelled successfully" });
 });
 
 
@@ -246,7 +441,8 @@ io.on('connection', socket => {
 
 app.get('/chat/:chatId', async (req, res) => {
   const chat = await Chat.findById(req.params.chatId)
-    .populate('messages.sender', 'userName');
+    .populate('messages.sender', 'userName')
+    .populate('users', 'userName');
 
   res.json(chat);
 });
@@ -258,13 +454,13 @@ app.get('/getoutpeople', async (req, res) => {
 
 app.post('/changestatus', async (req, res) => {
   const { userId } = req.body;
-  const person=await User.findById(userId);
-  let status=person.status;
-  if(status=="in"){
-    status="out";
+  const person = await User.findById(userId);
+  let status = person.status;
+  if (status == "in") {
+    status = "out";
   }
-  else{
-    status="in";
+  else {
+    status = "in";
   }
   const user = await User.findByIdAndUpdate(
     userId,
@@ -276,6 +472,6 @@ app.post('/changestatus', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0',() => {
   console.log(`Server running on port ${PORT}`);
 });

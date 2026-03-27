@@ -17,12 +17,23 @@ const RequestSchema = new mongoose.Schema(
     },
     status: {
           type: String,
-          enum: ["pending", "accepted","paid", "delivered", "cancelled"],
+          enum: ["pending", "accepted", "delivered", "cancelled"],
           default: "pending"
         },
     totalAmount: {
       type: Number,
       required: true
+    },
+    rejected:[
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      }
+    ],
+    chatId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Chat",
+      default: null
     },
     requested: [
       {

@@ -6,12 +6,21 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 export default function Myrequests() {
     const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
     const [Myrequest, setmyrequest] = useState([]);
     const [showrightdiv, setshowrightdiv] = useState(false);
     const [showEditblur, setshowEditblur] = useState(false);
+    const [showpreview, setshowpreview] = useState(false);
+    const [previndex, setprevindex] = useState(0);
+    const [confirmModal, setconfirmModal] = useState(null); // { title, message, onConfirm }
     const navigate = useNavigate();
+
     useEffect(() => {
-        axios.post("http://localhost:5000/myrequests", { userId })
+        axios.post("http://localhost:5000/myrequests", { userId }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
             .then(res => {
                 console.log(res);
                 setmyrequest(res.data);
@@ -21,12 +30,22 @@ export default function Myrequests() {
             })
     }, [])
 
+    function askConfirm(title, message, onConfirm) {
+        setconfirmModal({ title, message, onConfirm });
+        setshowEditblur(true);
+    }
+
+    function closeConfirm() {
+        setconfirmModal(null);
+        setshowEditblur(false);
+    }
+
     return (
         <div className="home-outer-div">
             <div className="home-top-bar">
                 <div className="title-name-div">
                     <p className="title-up-name"
-                        onClick={()=>{
+                        onClick={() => {
                             navigate("/home");
                         }}
                     >COLLEGE
@@ -49,9 +68,9 @@ export default function Myrequests() {
                         }}
                     >Requested</p>
                     <p
-                        onClick={()=>{
-                        navigate("/mydeliveries");
-                    }}
+                        onClick={() => {
+                            navigate("/mydeliveries");
+                        }}
                     >Accepted</p>
                     <p className="docs-p">Docs</p>
                     <p>Help</p>
@@ -78,7 +97,7 @@ export default function Myrequests() {
                     }}
                 >Requested</p>
                 <p
-                    onClick={()=>{
+                    onClick={() => {
                         navigate("/mydeliveries");
                     }}
                 >Accepted</p>
@@ -86,13 +105,20 @@ export default function Myrequests() {
                 <p>Help</p>
                 <img src={profileImg} className="profile-img"
                     onClick={() => {
-                            navigate(`/profile/${userId}`);
-                        }}
+                        navigate(`/profile/${userId}`);
+                    }}
                 ></img>
             </div>
             <div
                 className={showEditblur ? "blurscreens show" : "blurscreens"}
+                onClick={() => {
+                    if (confirmModal) return; // don't close blur when confirm is open
+                    setshowrightdiv(false);
+                    setshowEditblur(false);
+                    setshowpreview(false);
+                }}
             ></div>
+
             <p className="requests-head-p">My Requests:-</p>
             <div className="myrequest-cards-div">
                 {
@@ -109,70 +135,214 @@ export default function Myrequests() {
                         let deliveryfee;
                         if (data.totalAmount <= 500) {
                             deliveryfee = data.totalAmount / 10;
-                        }
-                        else {
+                        } else {
                             deliveryfee = 50;
                         }
-                        let issame;
-                        if (userId === (data.userId ? data.userId._id : data.userId)) {
-                            issame = true;
-                        }
-                        else {
-                            issame = false;
-                        }
+
                         return (
                             <div
-                                className="myrequest-card"
+                                key={data._id || index}
+                                className="home-request-card"
+                                onClick={() => {
+                                    setprevindex(index);
+                                    setshowpreview(true);
+                                    setshowEditblur(true);
+                                }}
                             >
-                                <p>UserName : <span>{data.userId.userName}</span></p>
-                                <div className="req-nums-div">
-                                    <p>No of Items: <span>{data.requested.length}</span></p>
-                                    <p>Total Price : <span>{data.totalAmount}</span></p>
-                                    <p>Delivery Fee : <span>{deliveryfee}</span></p>
+                                <div className="own-badge" style={{
+                                    background:
+                                        data.status === "accepted" ? "linear-gradient(135deg,#00c853,#69f0ae)" :
+                                            data.status === "pending" ? "linear-gradient(135deg,#e53935,#ef9a9a)" :
+                                                data.status === "delivered" ? "linear-gradient(135deg,#0288d1,#29b6f6)" :
+                                                    "linear-gradient(135deg,#757575,#bdbdbd)"
+                                }}>{data.status}</div>
+
+                                <div className="card-header-row">
+                                    <div className="card-avatar">
+                                        {data.userId.userName?.[0]?.toUpperCase() || "?"}
+                                    </div>
+                                    <div>
+                                        <p className="card-username">{data.userId.userName}</p>
+                                        <p className="card-time">{formatted}</p>
+                                    </div>
+                                    <div className="card-fee-chip">₹{deliveryfee} fee</div>
                                 </div>
-                                <p>Description : <span>{data.description}</span></p>
-                                <p>Requested At : <span>{formatted}</span></p>
-                                <p>Adress : <span>{data.address}</span></p>
-                                <p className="status"
-                                    style={{
-                                        color:
-                                            data.status==="accepted"
-                                            ?"green"
-                                            :data.status==="pending"
-                                            ?"red"
-                                            :data.status==="delivered"
-                                            ?"rgba(17, 255, 0, 1)"
-                                            :"grey",  
-                                    }}
-                                ><span
-                                    style={{
-                                        color:"grey"
-                                    }}
-                                >.</span>{data.status}</p>
-                                <div className="req-card-btn-div">
+
+                                <p className="card-desc">"{data.description}"</p>
+
+                                <div className="card-meta-row">
+                                    <div className="meta-pill">
+                                        <span className="meta-icon">📦</span>
+                                        <span>{data.requested.length} items</span>
+                                    </div>
+                                    <div className="meta-pill">
+                                        <span className="meta-icon">💰</span>
+                                        <span>₹{data.totalAmount}</span>
+                                    </div>
+                                    <div className="meta-pill address-pill">
+                                        <span className="meta-icon">📍</span>
+                                        <span>{data.address}</span>
+                                    </div>
+                                </div>
+
+                                <div className="req-card-btn-div"
+                                    onClick={e => e.stopPropagation()}
+                                >
                                     <button className="see-who-btn"
-                                        onClick={()=>{
-                                            navigate(`/profile/${data.acceptedBy}`);
-                                        }}
+                                        onClick={() => { navigate(`/profile/${data.acceptedBy}`); }}
                                         style={{
-                                            display:data.status=="pending"
-                                            ?"none"
-                                            :""
+                                            display: (data.status === "pending") || (data.status === "cancelled")
+                                                ? "none" : ""
                                         }}
                                     >see who</button>
-                                    <button className="make-payment-btn"
+                                    <button className="chat-btn"
                                         style={{
-                                            display:data.status!=="accepted"
-                                            ?"none"
-                                            :""
+                                            display: (data.status !== "accepted")
+                                                ? "none" : ""
                                         }}
-                                    >make payment</button>
+                                        onClick={() => { navigate(`/chat/${data.chatId}`) }}
+                                    >chat</button>
+                                    <button className="reject-btn"
+                                        style={{ display: data.status !== "accepted" ? "none" : "" }}
+                                        onClick={() => {
+                                            askConfirm(
+                                                "Reject Delivery?",
+                                                "The request will be reposted and the accepter will be notified. This cannot be undone.",
+                                                () => {
+                                                    const accepterId = data.acceptedBy;
+                                                    const requesterId = data.userId._id;
+                                                    axios.post(`http://localhost:5000/you-rejected/${data._id}`, { accepterId, requesterId }, {
+                                                        headers: {
+                                                            Authorization: `Bearer ${token}`,
+                                                        },
+                                                    })
+                                                        .then(res => { }).catch(err => { console.log(err); });
+                                                    window.location.reload();
+                                                }
+                                            );
+                                        }}
+                                    >reject & repost</button>
+                                    <button className="cancel-btn"
+                                        style={{ display: data.status !== "pending" ? "none" : "" }}
+                                        onClick={() => {
+                                            askConfirm(
+                                                "Cancel Request?",
+                                                "Your request will be permanently cancelled and removed from the list.",
+                                                () => {
+                                                    const requesterId = data.userId._id;
+                                                    axios.post(`http://localhost:5000/cancel-request/${data._id}`, { requesterId }, {
+                                                        headers: {
+                                                            Authorization: `Bearer ${token}`,
+                                                        },
+                                                    })
+                                                        .then(res => { }).catch(err => { console.log(err); });
+                                                    window.location.reload();
+                                                }
+                                            );
+                                        }}
+                                    >cancel request</button>
                                 </div>
                             </div>
                         );
                     })
                 }
             </div>
+
+            {/* Preview div */}
+            <div className={showpreview ? "preview-div show" : "preview-div"}>
+                <button className="close-prev-btn"
+                    onClick={() => {
+                        setshowpreview(false);
+                        setprevindex(0);
+                        setshowEditblur(false);
+                    }}
+                >✕</button>
+                {Myrequest[previndex] &&
+                    <div>
+                        <div className="preview-modal-header">
+                            <div className="preview-avatar">
+                                {Myrequest[previndex].userId.userName?.[0]?.toUpperCase()}
+                            </div>
+                            <div>
+                                <p className="preview-username">{Myrequest[previndex].userId.userName}</p>
+                                <p className="preview-subtitle">
+                                    {Myrequest[previndex].requested.length} items · ₹{Myrequest[previndex].totalAmount}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="preview-info-grid">
+                            <div className="info-card">
+                                <span className="info-label">Total Amount</span>
+                                <span className="info-value">₹{Myrequest[previndex].totalAmount}</span>
+                            </div>
+                            <div className="info-card">
+                                <span className="info-label">Items Count</span>
+                                <span className="info-value">{Myrequest[previndex].requested.length}</span>
+                            </div>
+                            <div className="info-card">
+                                <span className="info-label">Status</span>
+                                <span className="info-value" style={{
+                                    fontSize: "16px",
+                                    color:
+                                        Myrequest[previndex].status === "accepted" ? "#00c853" :
+                                            Myrequest[previndex].status === "pending" ? "#e53935" :
+                                                Myrequest[previndex].status === "delivered" ? "#0288d1" : "grey"
+                                }}>{Myrequest[previndex].status}</span>
+                            </div>
+                        </div>
+
+                        <div className="preview-field">
+                            <span className="field-label">📝 Description</span>
+                            <p className="field-value">"{Myrequest[previndex].description}"</p>
+                        </div>
+
+                        <div className="preview-field">
+                            <span className="field-label">📍 Delivery Address</span>
+                            <p className="field-value">{Myrequest[previndex].address}</p>
+                        </div>
+
+                        <div className="items-section">
+                            <h4 className="items-title">🛍️ Items List</h4>
+                            {Myrequest[previndex].requested.map((item, idx) => (
+                                <div className="item-card" key={idx}>
+                                    <div className="item-name-row">
+                                        <span className="item-name">{item.itemName}</span>
+                                        <span className="item-total">₹{item.quantity * item.price}</span>
+                                    </div>
+                                    <div className="item-details">
+                                        <span>Qty: {item.quantity}</span>
+                                        <span>Price: ₹{item.price}</span>
+                                    </div>
+                                    {item.description && (
+                                        <p className="item-desc">{item.description}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                }
+            </div>
+
+            {/* Custom confirm warning modal */}
+            {confirmModal && (
+                <div className="confirm-modal">
+                    <div className="confirm-icon">⚠️</div>
+                    <h3 className="confirm-title">{confirmModal.title}</h3>
+                    <p className="confirm-message">{confirmModal.message}</p>
+                    <div className="confirm-btns">
+                        <button className="confirm-no-btn" onClick={closeConfirm}>
+                            No, Go Back
+                        </button>
+                        <button className="confirm-yes-btn" onClick={() => {
+                            confirmModal.onConfirm();
+                            closeConfirm();
+                        }}>
+                            Yes, Confirm
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -23,7 +23,7 @@ const UserSchema=new mongoose.Schema({
           type: String,
           enum: ["out","in"],
           default: "in"
-        },
+    },
 });
 
 module.exports=mongoose.model('User',UserSchema);

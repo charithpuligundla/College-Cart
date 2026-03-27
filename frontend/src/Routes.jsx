@@ -9,6 +9,7 @@ import Profile from "./Profile";
 import Mydeliveries from "./Mydeliveries";
 import CountdownTimer from "./Timer";
 import DocsPage from "./docs";
+import ProtectedRoute from "./ProtectedRoute";
 
 export default function Router() {
   return (
@@ -17,11 +18,11 @@ export default function Router() {
         <Route path="/" element={<App />} />
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/addrequest" element={<AddRequest />} />
-        <Route path="/chat/:chatId" element={<ChatRoom />} />
-        <Route path="/myrequests" element={<Myrequests />} />
-        <Route path="/profile/:profileId" element={<Profile />} />
-        <Route path="/mydeliveries" element={<Mydeliveries />} />
+        <Route path="/addrequest" element={<ProtectedRoute><AddRequest /></ProtectedRoute>} />
+        <Route path="/chat/:chatId" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
+        <Route path="/myrequests" element={<ProtectedRoute><Myrequests /></ProtectedRoute>} />
+        <Route path="/profile/:profileId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/mydeliveries" element={<ProtectedRoute><Mydeliveries /></ProtectedRoute>} />
         <Route path="/timer" element={<CountdownTimer />} />
         <Route path="/docs" element={<DocsPage />} />
       </Routes>

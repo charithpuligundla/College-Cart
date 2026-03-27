@@ -7,6 +7,7 @@ import { useEffect } from "react";
 export default function App() {
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
 
   useEffect(()=>{
     if(userId){

@@ -22,6 +22,7 @@ export default function AddRequest() {
     const [NoteP,setNoteP]=useState("");
     const [totalcost,settotalcost]=useState(0);
     const userId=localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
     const [description,setdescription]=useState("");
     const [showreqcon,setshowreqcon]=useState(false);
     const [address,setaddress]=useState("");
@@ -90,7 +91,11 @@ export default function AddRequest() {
             alert("address is must to deliver to your place");
             return;
         }
-        axios.post("http://localhost:5000/request",{userId,description,address,totalAmount:totalcost,requested:items})
+        axios.post("http://localhost:5000/request",{userId,description,address,totalAmount:totalcost,requested:items},{
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
         .then(res=>{
             console.log(res)
         })
