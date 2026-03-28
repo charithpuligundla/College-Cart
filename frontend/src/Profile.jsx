@@ -14,9 +14,10 @@ export default function Profile() {
     const [showrightdiv, setshowrightdiv] = useState(false);
     const [showEditblur, setshowEditblur] = useState(false);
     const navigate = useNavigate();
+    const backenduri = import.meta.env.VITE_BACKENDURI;
 
     useEffect(() => {
-        axios.post("http://localhost:5000/getuser", { profileId }, {
+        axios.post(`${backenduri}/getuser`, { profileId }, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -80,15 +81,9 @@ export default function Profile() {
                     {
                         (userId === profileId) && <button className="logout-btn"
                             onClick={() => {
-                                askConfirm(
-                                    "conform logout",
-                                    "you will be logged out from this device.you need to login again to use.",
-                                    ()=>{
                                     localStorage.removeItem("userId");
                                 localStorage.removeItem("token");
                                 window.location.reload();
-                                }
-                                )
                             }}
                         >Log Out</button>
                     }

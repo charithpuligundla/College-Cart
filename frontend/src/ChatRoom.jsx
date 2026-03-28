@@ -4,7 +4,9 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import "./ChatRoom.css";
 
-const socket = io("http://localhost:5000");
+
+const backenduri = import.meta.env.VITE_BACKENDURI;
+const socket = io(backenduri);
 
 export default function ChatRoom() {
     const { chatId } = useParams();
@@ -25,7 +27,7 @@ export default function ChatRoom() {
 
         socket.on("receiveMessage", handleReceiveMessage);
 
-        axios.get(`http://localhost:5000/chat/${chatId}`,{
+        axios.get(`${backenduri}/chat/${chatId}`,{
             headers: {
                 Authorization: `Bearer ${token}`,
             },

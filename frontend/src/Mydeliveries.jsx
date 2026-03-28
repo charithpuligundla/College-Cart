@@ -14,9 +14,10 @@ export default function Mydeliveries() {
     const [previndex, setprevindex] = useState(0);
     const [confirmModal, setconfirmModal] = useState(null);
     const navigate = useNavigate();
+    const backenduri = import.meta.env.VITE_BACKENDURI;
 
     useEffect(() => {
-        axios.post("http://localhost:5000/myaccepts", { userId },{
+        axios.post(`${backenduri}/myaccepts`, { userId },{
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -126,7 +127,7 @@ export default function Mydeliveries() {
                                                 () => {
                                                     const accepterId = data.acceptedBy;
                                                     const requesterId = data.userId._id;
-                                                    axios.post(`http://localhost:5000/delivered/${data._id}`, { accepterId, requesterId }, {
+                                                    axios.post(`${backenduri}/delivered/${data._id}`, { accepterId, requesterId }, {
                                                         headers: {
                                                             Authorization: `Bearer ${token}`,
                                                         },
@@ -150,7 +151,7 @@ export default function Mydeliveries() {
                                             () => {
                                                 const accepterId = data.acceptedBy;
                                                 const requesterId = data.userId._id;
-                                                axios.post(`http://localhost:5000/reject-request/${data._id}`, { accepterId, requesterId },{
+                                                axios.post(`${backenduri}/reject-request/${data._id}`, { accepterId, requesterId },{
             headers: {
                 Authorization: `Bearer ${token}`,
             },

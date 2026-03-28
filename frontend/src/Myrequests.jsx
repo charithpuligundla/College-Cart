@@ -14,9 +14,10 @@ export default function Myrequests() {
     const [previndex, setprevindex] = useState(0);
     const [confirmModal, setconfirmModal] = useState(null); // { title, message, onConfirm }
     const navigate = useNavigate();
+    const backenduri = import.meta.env.VITE_BACKENDURI;
 
     useEffect(() => {
-        axios.post("http://localhost:5000/myrequests", { userId }, {
+        axios.post(`${backenduri}/myrequests`, { userId }, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -211,7 +212,7 @@ export default function Myrequests() {
                                                 () => {
                                                     const accepterId = data.acceptedBy;
                                                     const requesterId = data.userId._id;
-                                                    axios.post(`http://localhost:5000/you-rejected/${data._id}`, { accepterId, requesterId }, {
+                                                    axios.post(`${backenduri}/you-rejected/${data._id}`, { accepterId, requesterId }, {
                                                         headers: {
                                                             Authorization: `Bearer ${token}`,
                                                         },
@@ -230,7 +231,7 @@ export default function Myrequests() {
                                                 "Your request will be permanently cancelled and removed from the list.",
                                                 () => {
                                                     const requesterId = data.userId._id;
-                                                    axios.post(`http://localhost:5000/cancel-request/${data._id}`, { requesterId }, {
+                                                    axios.post(`${backenduri}/cancel-request/${data._id}`, { requesterId }, {
                                                         headers: {
                                                             Authorization: `Bearer ${token}`,
                                                         },

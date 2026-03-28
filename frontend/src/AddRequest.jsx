@@ -26,6 +26,7 @@ export default function AddRequest() {
     const [description,setdescription]=useState("");
     const [showreqcon,setshowreqcon]=useState(false);
     const [address,setaddress]=useState("");
+    const backenduri = import.meta.env.VITE_BACKENDURI;
 
     function addItem() {
         if (itemName.trim() === "" || itemDes.trim() === "") {
@@ -91,7 +92,7 @@ export default function AddRequest() {
             alert("address is must to deliver to your place");
             return;
         }
-        axios.post("http://localhost:5000/request",{userId,description,address,totalAmount:totalcost,requested:items},{
+        axios.post(`${backenduri}/request`,{userId,description,address,totalAmount:totalcost,requested:items},{
             headers: {
                 Authorization: `Bearer ${token}`,
             },

@@ -44,6 +44,7 @@ function Login() {
     const [degree,setDegree]=useState("B.Tech");
     const [branch,setBranch]=useState("Computer Science & Engineering");
     const [year,setYear]=useState(1);
+    const backenduri = import.meta.env.VITE_BACKENDURI;
 
 
     useEffect(() => {
@@ -81,7 +82,7 @@ function Login() {
             alert("Both passwords are not matching.");
             return;
         }
-        axios.post('http://localhost:5000/signup', {
+        axios.post(`${backenduri}/signup`, {
             userName: signupData.userName,
             email: signupData.email,
             password: signupData.password,
@@ -110,7 +111,7 @@ function Login() {
             alert("Please enter a valid Gmail address.");
             return;
         }
-        axios.post('http://localhost:5000/login', {
+        axios.post(`${backenduri}/login`, {
             email: loginData.email,
             password: loginData.password
         }).then(response => {

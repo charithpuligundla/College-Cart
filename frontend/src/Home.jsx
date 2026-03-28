@@ -17,10 +17,11 @@ export default function Home() {
     const [user, setuser] = useState(null);
     const [outpeople, setoutpeople] = useState([]);
     const [ownreq, setownreq] = useState(false);
+    const backenduri = import.meta.env.VITE_BACKENDURI;
 
 
     useEffect(() => {
-        axios.get("http://localhost:5000/getrequests", {
+        axios.get(`${backenduri}/getrequests`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -35,7 +36,7 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        axios.post("http://localhost:5000/getuser", { profileId: userId }, {
+        axios.post(`${backenduri}/getuser`, { profileId: userId }, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -50,7 +51,7 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        axios.get("http://localhost:5000/getoutpeople", {
+        axios.get(`${backenduri}/getoutpeople`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -79,7 +80,7 @@ export default function Home() {
     }
 
     async function changepersonstatus() {
-        await axios.post("http://localhost:5000/changestatus", { userId }, {
+        await axios.post(`${backenduri}/changestatus`, { userId }, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -91,7 +92,7 @@ export default function Home() {
             .catch(err => {
                 console.log(err)
             });
-        await axios.get("http://localhost:5000/getoutpeople", {
+        await axios.get(`${backenduri}/getoutpeople`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -334,7 +335,7 @@ export default function Home() {
                                                 onClick={
                                                     async () => {
                                                         await axios.post(
-                                                            `http://localhost:5000/accept-request/${requestdata[previndex]._id}`,
+                                                            `${backenduri}/accept-request/${requestdata[previndex]._id}`,
                                                             { accepterId: userId, requesterId: requestdata[previndex].userId._id },
                                                             {
                                                                 headers: {
