@@ -81,15 +81,16 @@ app.post('/signup', async (req, res) => {
 
     const verifyLink = `${backenduri}/verify-email/${token}`;
 
-    await transporter.sendMail({
-      to: email,
-      subject: "Verify your email",
-      html: `
-        <h3>Welcome </h3>
-        <p>Click below to verify your email:</p>
-        <a href="${verifyLink}">Verify Email</a>
-      `
-    });
+    try {
+  await transporter.sendMail({
+    to: email,
+    subject: "Verify your email",
+    html: `<a href="${verifyLink}">Verify Email</a>`
+  });
+  console.log("✅ Mail sent");
+} catch (err) {
+  console.error("❌ Mail error:", err);
+}
 
     res.status(200).json({ message: "Verification email sent", token, user: newUser });
   }
@@ -119,7 +120,7 @@ app.get("/verify-email/:token", async (req, res) => {
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
 
-    await User.findByIdAndUpdate(decoded.userId, {
+    await User.findByIdAndUpdate(decoded.id, {
       isVerified: true
     });
     res.send("Email verified successfully ✅");
