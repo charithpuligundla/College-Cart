@@ -10,7 +10,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const Chat = require('./ChatSchema.js');
 
-const backenduri=process.env.BACKENDURI;
+const backenduri="https://college-cart-epzl.onrender.com";
 
 const app = express();
 app.use(express.json());
