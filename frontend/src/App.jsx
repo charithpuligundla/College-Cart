@@ -1,4 +1,4 @@
-import "./app.css";
+import "./App.css";
 import titleNameimg from "./images/title-name.png";
 import facilityimg from "./images/facility-img.png";
 import { useNavigate } from "react-router-dom";
