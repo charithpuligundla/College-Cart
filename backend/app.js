@@ -10,7 +10,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const Chat = require('./ChatSchema.js');
 
-const linktorun="https://college-cart-epzl.onrender.com/";
+const backenduri=process.env.BACKENDURI;
 
 const app = express();
 app.use(express.json());
@@ -79,7 +79,7 @@ app.post('/signup', async (req, res) => {
 
     const token = jwt.sign({ id: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: '30d' });
 
-    const verifyLink = `http://localhost:5000/verify-email/${token}`;
+    const verifyLink = `${backenduri}/verify-email/${token}`;
 
     await transporter.sendMail({
       to: email,
