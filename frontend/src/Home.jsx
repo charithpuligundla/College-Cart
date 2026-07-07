@@ -126,8 +126,7 @@ export default function Home() {
                             <div className="right-top-div">
                                 <p onClick={() => { navigate("/myrequests"); }}>Requested</p>
                                 <p onClick={() => { navigate("/mydeliveries"); }}>Accepted</p>
-                                <p className="docs-p">Docs</p>
-                                <p>Help</p>
+                                <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                                 <img src={profileImg} className="profile-img"
                                     onClick={() => { navigate(`/profile/${userId}`); }}
                                 ></img>
@@ -142,8 +141,7 @@ export default function Home() {
                             >☰</button>
                             <p onClick={() => { navigate("/myrequests"); }}>Requested</p>
                             <p onClick={() => { navigate("/mydeliveries"); }}>Accepted</p>
-                            <p className="docs-p">Docs</p>
-                            <p>Help</p>
+                            <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                             <img src={profileImg} className="profile-img"
                                 onClick={() => { navigate(`/profile/${userId}`); }}
                             ></img>

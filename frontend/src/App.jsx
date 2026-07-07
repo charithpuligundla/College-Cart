@@ -39,9 +39,7 @@ export default function App() {
               Simplify Your College <span>Shopping🛒</span> Experience
             </p>
             <p className="opening-hero-para">
-              Discover the ultimate platform for college students to find,
-              compare, and purchase textbooks, supplies, and dorm essentials
-              all in one place.
+              Discover the ultimate platform for college students to request or accept request for items, making campus life more convenient and connected.
             </p>
             <button className="get-started-btn-down"
               onClick={()=>{

@@ -17,7 +17,7 @@ export default function Mydeliveries() {
     const backenduri = import.meta.env.VITE_BACKENDURI;
 
     useEffect(() => {
-        axios.post(`${backenduri}/myaccepts`, { userId },{
+        axios.post(`${backenduri}/myaccepts`, { userId }, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -50,8 +50,7 @@ export default function Mydeliveries() {
                 <div className="right-top-div">
                     <p onClick={() => { navigate("/myrequests"); }}>Requested</p>
                     <p style={{ backgroundColor: "rgba(0, 140, 255, 1)", color: "white", padding: "5px", borderRadius: "15px" }}>Accepted</p>
-                    <p className="docs-p">Docs</p>
-                    <p>Help</p>
+                    <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                     <img src={profileImg} className="profile-img" onClick={() => { navigate(`/profile/${userId}`); }}></img>
                 </div>
             </div>
@@ -61,8 +60,7 @@ export default function Mydeliveries() {
                 >☰</button>
                 <p onClick={() => { navigate("/myrequests"); }}>Requested</p>
                 <p style={{ backgroundColor: "rgba(0, 140, 255, 1)", color: "white", padding: "5px", borderRadius: "15px" }}>Accepted</p>
-                <p className="docs-p">Docs</p>
-                <p>Help</p>
+                <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                 <img src={profileImg} className="profile-img" onClick={() => { navigate(`/profile/${userId}`); }}></img>
             </div>
             <div className={showEditblur ? "blurscreens show" : "blurscreens"}
@@ -90,11 +88,11 @@ export default function Mydeliveries() {
                         >
                             <div className="own-badge" style={{
                                 background:
-                                    data.status === "accepted"  ? "linear-gradient(135deg,#00c853,#69f0ae)" :
-                                    data.status === "pending"   ? "linear-gradient(135deg,#e53935,#ef9a9a)" :
-                                    data.status === "delivered" ? "linear-gradient(135deg,#0288d1,#29b6f6)" :
-                                    data.status === "paid"      ? "linear-gradient(135deg,#f9a825,#ffd54f)" :
-                                    "linear-gradient(135deg,#757575,#bdbdbd)"
+                                    data.status === "accepted" ? "linear-gradient(135deg,#00c853,#69f0ae)" :
+                                        data.status === "pending" ? "linear-gradient(135deg,#e53935,#ef9a9a)" :
+                                            data.status === "delivered" ? "linear-gradient(135deg,#0288d1,#29b6f6)" :
+                                                data.status === "paid" ? "linear-gradient(135deg,#f8ff28,#ffef88)" :
+                                                    "linear-gradient(135deg,#757575,#bdbdbd)"
                             }}>{data.status}</div>
 
                             <div className="card-header-row">
@@ -119,27 +117,27 @@ export default function Mydeliveries() {
                                     onClick={() => { navigate(`/profile/${data.userId._id}`); }}
                                 >see who</button>
                                 <button className="make-payment-btn"
-                                    style={{ display: data.status !== "accepted" ? "none" : "" }}
+                                    style={{ display: data.status !== "paid" ? "none" : "" }}
                                     onClick={() => {
-                                            askConfirm(
-                                                "Delivery order?",
-                                                "The order will be mark as deliverd . This cannot be undone.",
-                                                () => {
-                                                    const accepterId = data.acceptedBy;
-                                                    const requesterId = data.userId._id;
-                                                    axios.post(`${backenduri}/delivered/${data._id}`, { accepterId, requesterId }, {
-                                                        headers: {
-                                                            Authorization: `Bearer ${token}`,
-                                                        },
-                                                    })
-                                                        .then(res => { }).catch(err => { console.log(err); });
-                                                    window.location.reload();
-                                                }
-                                            );
-                                        }}
+                                        askConfirm(
+                                            "Delivery order?",
+                                            "The order will be mark as deliverd . This cannot be undone.",
+                                            () => {
+                                                const accepterId = data.acceptedBy;
+                                                const requesterId = data.userId._id;
+                                                axios.post(`${backenduri}/deliveredA/${data._id}`, { accepterId, requesterId }, {
+                                                    headers: {
+                                                        Authorization: `Bearer ${token}`,
+                                                    },
+                                                })
+                                                    .then(res => { }).catch(err => { console.log(err); });
+                                                window.location.reload();
+                                            }
+                                        );
+                                    }}
                                 >complete delivery</button>
                                 <button className="chat-btn"
-                                    style={{ display: (data.status !== "accepted")? "none" : "" }}
+                                    style={{ display: (data.status !== "accepted") ? "none" : "" }}
                                     onClick={() => { navigate(`/chat/${data.chatId}`) }}
                                 >chat</button>
                                 <button className="reject-btn"
@@ -151,12 +149,12 @@ export default function Mydeliveries() {
                                             () => {
                                                 const accepterId = data.acceptedBy;
                                                 const requesterId = data.userId._id;
-                                                axios.post(`${backenduri}/reject-request/${data._id}`, { accepterId, requesterId },{
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-                                                    .then(res => {}).catch(err => { console.log(err); });
+                                                axios.post(`${backenduri}/reject-request/${data._id}`, { accepterId, requesterId }, {
+                                                    headers: {
+                                                        Authorization: `Bearer ${token}`,
+                                                    },
+                                                })
+                                                    .then(res => { }).catch(err => { console.log(err); });
                                                 window.location.reload();
                                             }
                                         );
@@ -203,10 +201,10 @@ export default function Mydeliveries() {
                                 <span className="info-value" style={{
                                     fontSize: "16px",
                                     color:
-                                        mydeliveries[previndex].status === "accepted"  ? "#00c853" :
-                                        mydeliveries[previndex].status === "pending"   ? "#e53935" :
-                                        mydeliveries[previndex].status === "delivered" ? "#0288d1" :
-                                        mydeliveries[previndex].status === "paid"      ? "#f9a825" : "grey"
+                                        mydeliveries[previndex].status === "accepted" ? "#00c853" :
+                                            mydeliveries[previndex].status === "pending" ? "#e53935" :
+                                                mydeliveries[previndex].status === "delivered" ? "#0288d1" :
+                                                    mydeliveries[previndex].status === "paid" ? "#f9a825" : "grey"
                                 }}>{mydeliveries[previndex].status}</span>
                             </div>
                         </div>

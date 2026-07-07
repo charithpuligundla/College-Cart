@@ -17,7 +17,7 @@ const RequestSchema = new mongoose.Schema(
     },
     status: {
           type: String,
-          enum: ["pending", "accepted", "delivered", "cancelled"],
+          enum: ["pending", "accepted","paid", "deliveredA","deliveredB", "cancelled"],
           default: "pending"
         },
     totalAmount: {

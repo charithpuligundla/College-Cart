@@ -10,7 +10,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const Chat = require('./ChatSchema.js');
 
-const backenduri="https://college-cart-epzl.onrender.com";
+// const backenduri="https://college-cart-epzl.onrender.com";
+const backenduri="http://localhost:5000";
 
 const app = express();
 app.use(express.json());
@@ -296,7 +297,7 @@ app.post('/you-rejected/:requestId', async (req, res) => {
   res.status(200).json({ message: "Request rejected successfully" });
 });
 
-app.post('/delivered/:requestId', async (req, res) => {
+app.post('/deliveredA/:requestId', async (req, res) => {
   const { accepterId, requesterId } = req.body;
 
   if (!accepterId || !requesterId) {
@@ -314,8 +315,25 @@ app.post('/delivered/:requestId', async (req, res) => {
     await chat.deleteOne();
   }
 
-  request.status = 'delivered';
+  request.status = 'deliveredA';
   request.chatId = null;
+  await request.save();
+
+  res.status(200).json({ message: "Order deliverd successfully" });
+});
+
+app.post('/deliveredB/:requestId', async (req, res) => {
+  const { accepterId, requesterId } = req.body;
+
+  if (!accepterId || !requesterId) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const request = await Request.findById(req.params.requestId);
+  if (!request) return res.status(404).json({ message: 'Request not found' });
+
+
+  request.status = 'deliveredB';
   await request.save();
   const accepter = await User.findById(accepterId);
   const requester = await User.findById(requesterId);

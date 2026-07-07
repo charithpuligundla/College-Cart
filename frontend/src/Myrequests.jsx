@@ -73,8 +73,7 @@ export default function Myrequests() {
                             navigate("/mydeliveries");
                         }}
                     >Accepted</p>
-                    <p className="docs-p">Docs</p>
-                    <p>Help</p>
+                    <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                     <img src={profileImg} className="profile-img"
                         onClick={() => {
                             navigate(`/profile/${userId}`);
@@ -102,8 +101,7 @@ export default function Myrequests() {
                         navigate("/mydeliveries");
                     }}
                 >Accepted</p>
-                <p className="docs-p">Docs</p>
-                <p>Help</p>
+                <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                 <img src={profileImg} className="profile-img"
                     onClick={() => {
                         navigate(`/profile/${userId}`);
@@ -155,7 +153,8 @@ export default function Myrequests() {
                                         data.status === "accepted" ? "linear-gradient(135deg,#00c853,#69f0ae)" :
                                             data.status === "pending" ? "linear-gradient(135deg,#e53935,#ef9a9a)" :
                                                 data.status === "delivered" ? "linear-gradient(135deg,#0288d1,#29b6f6)" :
-                                                    "linear-gradient(135deg,#757575,#bdbdbd)"
+                                                    data.status === "paid" ? "linear-gradient(135deg,#f8ff28,#ffef88)" :
+                                                        "linear-gradient(135deg,#757575,#bdbdbd)"
                                 }}>{data.status}</div>
 
                                 <div className="card-header-row">
@@ -203,6 +202,33 @@ export default function Myrequests() {
                                         }}
                                         onClick={() => { navigate(`/chat/${data.chatId}`) }}
                                     >chat</button>
+                                    <button className="payment-btn"
+                                        style={{
+                                            display: (data.status !== "accepted")
+                                                ? "none" : ""
+                                        }}
+                                        onClick={() => { }}
+                                    >Make payment</button>
+                                    <button className="make-payment-btn"
+                                    style={{ display: data.status !== "deliveredA" ? "none" : "" }}
+                                    onClick={() => {
+                                        askConfirm(
+                                            "Delivery order?",
+                                            "The order will be mark as deliverd . This cannot be undone.",
+                                            () => {
+                                                const accepterId = data.acceptedBy;
+                                                const requesterId = data.userId._id;
+                                                axios.post(`${backenduri}/deliveredB/${data._id}`, { accepterId, requesterId }, {
+                                                    headers: {
+                                                        Authorization: `Bearer ${token}`,
+                                                    },
+                                                })
+                                                    .then(res => { }).catch(err => { console.log(err); });
+                                                window.location.reload();
+                                            }
+                                        );
+                                    }}
+                                >complete delivery</button>
                                     <button className="reject-btn"
                                         style={{ display: data.status !== "accepted" ? "none" : "" }}
                                         onClick={() => {
