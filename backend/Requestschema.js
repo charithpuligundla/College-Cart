@@ -24,6 +24,22 @@ const RequestSchema = new mongoose.Schema(
       type: Number,
       required: true
     },
+    amountToPay:{
+      type:Number,
+      default:0
+    },
+    deliveryFee:{
+      type:Number,
+      default:0
+    },
+    sellerAmount: {
+      type: Number,
+      required: true
+    },
+    razorpayOrderId:String,
+    razorpayPaymentId:String,
+    razorpaySignature:String,
+    razorpayTransferId:String,
     rejected:[
       {
         type: mongoose.Schema.Types.ObjectId,

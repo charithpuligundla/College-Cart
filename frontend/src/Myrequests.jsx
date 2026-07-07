@@ -133,10 +133,11 @@ export default function Myrequests() {
                         });
                         let deliveryfee;
                         if (data.totalAmount <= 500) {
-                            deliveryfee = data.totalAmount / 10;
+                            deliveryfee = Math.floor((data.totalAmount*6)/100);
                         } else {
                             deliveryfee = 50;
                         }
+                        if(deliveryfee<5) deliveryfee=5;
 
                         return (
                             <div

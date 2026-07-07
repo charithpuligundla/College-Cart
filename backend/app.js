@@ -9,6 +9,9 @@ const nodemailer = require('nodemailer');
 const http = require('http');
 const { Server } = require('socket.io');
 const Chat = require('./ChatSchema.js');
+require('dotenv').config();
+const Razorpay = require('./Razorpay.js');
+const crypto = require("crypto");
 
 // const backenduri="https://college-cart-epzl.onrender.com";
 const backenduri="http://localhost:5000";
@@ -16,10 +19,9 @@ const backenduri="http://localhost:5000";
 const app = express();
 app.use(express.json());
 app.use(cors());
-require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const mongodburl=process.env.MONGODBURL;
+const mongodburl = process.env.MONGODBURL;
 
 mongoose.connect(mongodburl)
   .then(() => console.log('mongodb connected'))
@@ -83,15 +85,15 @@ app.post('/signup', async (req, res) => {
     const verifyLink = `${backenduri}/verify-email/${token}`;
 
     try {
-  await transporter.sendMail({
-    to: email,
-    subject: "Verify your email",
-    html: `<a href="${verifyLink}">Verify Email</a>`
-  });
-  console.log("✅ Mail sent");
-} catch (err) {
-  console.error("❌ Mail error:", err);
-}
+      await transporter.sendMail({
+        to: email,
+        subject: "Verify your email",
+        html: `<a href="${verifyLink}">Verify Email</a>`
+      });
+      console.log("✅ Mail sent");
+    } catch (err) {
+      console.error("❌ Mail error:", err);
+    }
 
     res.status(200).json({ message: "Verification email sent", token, user: newUser });
   }
@@ -150,20 +152,79 @@ app.post('/getuser', async (req, res) => {
 
 app.post('/request', async (req, res) => {
   const { userId, description, address, totalAmount, requested } = req.body;
+  let deliveryFee = Math.floor(totalAmount * 0.06);
+  if (deliveryFee < 5) deliveryFee = 5;
+  else if (deliveryFee > 50) deliveryFee = 50;
+  let amountToPay = totalAmount + deliveryFee + Math.floor(totalAmount * 0.04);
+  let sellerAmount = totalAmount + deliveryFee;
+  const razorpayOrder = await Razorpay.orders.create({
+    amount: amountToPay * 100,
+    currency: "INR",
+    receipt: "receipt_" + Date.now()
+  });
   try {
     const newRequest = new Request({
       userId,
       description,
       address,
       totalAmount,
-      requested
+      amountToPay,
+      deliveryFee,
+      sellerAmount,
+      requested,
+      razorpayOrderId: razorpayOrder.id
     });
+    const razorpaydetails = {
+      success: true,
+      key: process.env.RAZORPAY_KEY_ID,
+      orderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      dbOrderId: order._id
+    };
     await newRequest.save();
     await User.findByIdAndUpdate(userId, { $inc: { no_requests: 1 } });
-    res.status(201).json({ message: 'Request created successfully', request: newRequest });
+    res.status(201).json({ message: 'Request created successfully', request: newRequest ,razorpaydetails});
   } catch (err) {
     res.status(500).json({ message: 'Something went wrong', error: err.message });
   }
+});
+
+app.post('/verify-payment',async (req, res) => {
+    try {
+        const { dbOrderId, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+        // 1. Generate the expected signature
+        const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
+        hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+        const generatedSignature = hmac.digest("hex");
+
+        // 2. Validate signatures
+        if (generatedSignature !== razorpay_signature) {
+            return res.status(400).json({ success: false, message: "Payment verification failed" });
+        }
+
+        // 3. Update the MongoDB Order to "Paid"
+        
+        const updatedOrder = await Order.findByIdAndUpdate(
+            dbOrderId,
+            {
+                razorpayPaymentId: razorpay_payment_id,
+                razorpaySignature: razorpay_signature,
+                paymentStatus: "Paid"
+            },
+            { new: true }
+        );
+
+        res.json({
+            success: true,
+            message: "Payment verified and order updated successfully!",
+            order: updatedOrder
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Payment verification process failed" });
+    }
 });
 
 
@@ -490,8 +551,82 @@ app.post('/changestatus', async (req, res) => {
   res.json(user);
 });
 
+app.get("/razor", async (req, res) => {
+
+  try {
+
+    const order = await Razorpay.orders.create({
+
+      amount: 100,
+
+      currency: "INR"
+
+    });
+    console.log(order);
+    res.json(order);
+
+  }
+
+  catch (err) {
+
+    res.status(500).json(err);
+
+  }
+
+});
+
+app.post("/add-seller", async (req, res) => {
+  try {
+    const { upiId, phone } = req.body;
+
+    if (!upiId) {
+      return res.status(400).json({ message: "UPI ID is required" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const contact = await razorpay.contacts.create({
+      name: user.username,
+      email: user.email,
+      contact: phone || user.phone,
+      type: "vendor"
+    });
+
+    const fundAccount = await razorpay.fundAccounts.create({
+      contact_id: contact.id,
+      account_type: "vpa",
+      vpa: {
+        address: upiId
+      }
+    });
+
+    user.isseller = true;
+    user.upiId = upiId;
+    user.razorpayContactId = contact.id;
+    user.razorpayFundAccountId = fundAccount.id;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Seller Registered successfully",
+      seller: user
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: err.message
+    });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, '0.0.0.0',() => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });

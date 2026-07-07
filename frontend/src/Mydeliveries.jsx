@@ -80,7 +80,7 @@ export default function Mydeliveries() {
                         hour: "2-digit", minute: "2-digit", hour12: true,
                         day: "2-digit", month: "short", year: "numeric"
                     });
-                    const deliveryfee = data.totalAmount <= 500 ? data.totalAmount / 10 : 50;
+                    const deliveryfee = data.totalAmount <= 500 ? Math.floor((data.totalAmount*6)/100) : 50;
 
                     return (
                         <div key={data._id || index} className="home-request-card"
