@@ -73,8 +73,7 @@ export default function Myrequests() {
                             navigate("/mydeliveries");
                         }}
                     >Accepted</p>
-                    <p className="docs-p">Docs</p>
-                    <p>Help</p>
+                    <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                     <img src={profileImg} className="profile-img"
                         onClick={() => {
                             navigate(`/profile/${userId}`);
@@ -102,8 +101,7 @@ export default function Myrequests() {
                         navigate("/mydeliveries");
                     }}
                 >Accepted</p>
-                <p className="docs-p">Docs</p>
-                <p>Help</p>
+                <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                 <img src={profileImg} className="profile-img"
                     onClick={() => {
                         navigate(`/profile/${userId}`);
@@ -135,10 +133,11 @@ export default function Myrequests() {
                         });
                         let deliveryfee;
                         if (data.totalAmount <= 500) {
-                            deliveryfee = data.totalAmount / 10;
+                            deliveryfee = Math.floor((data.totalAmount*6)/100);
                         } else {
                             deliveryfee = 50;
                         }
+                        if(deliveryfee<5) deliveryfee=5;
 
                         return (
                             <div

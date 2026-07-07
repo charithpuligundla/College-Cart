@@ -50,8 +50,7 @@ export default function Mydeliveries() {
                 <div className="right-top-div">
                     <p onClick={() => { navigate("/myrequests"); }}>Requested</p>
                     <p style={{ backgroundColor: "rgba(0, 140, 255, 1)", color: "white", padding: "5px", borderRadius: "15px" }}>Accepted</p>
-                    <p className="docs-p">Docs</p>
-                    <p>Help</p>
+                    <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                     <img src={profileImg} className="profile-img" onClick={() => { navigate(`/profile/${userId}`); }}></img>
                 </div>
             </div>
@@ -61,8 +60,7 @@ export default function Mydeliveries() {
                 >☰</button>
                 <p onClick={() => { navigate("/myrequests"); }}>Requested</p>
                 <p style={{ backgroundColor: "rgba(0, 140, 255, 1)", color: "white", padding: "5px", borderRadius: "15px" }}>Accepted</p>
-                <p className="docs-p">Docs</p>
-                <p>Help</p>
+                <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                 <img src={profileImg} className="profile-img" onClick={() => { navigate(`/profile/${userId}`); }}></img>
             </div>
             <div className={showEditblur ? "blurscreens show" : "blurscreens"}
@@ -82,7 +80,7 @@ export default function Mydeliveries() {
                         hour: "2-digit", minute: "2-digit", hour12: true,
                         day: "2-digit", month: "short", year: "numeric"
                     });
-                    const deliveryfee = data.totalAmount <= 500 ? data.totalAmount / 10 : 50;
+                    const deliveryfee = data.totalAmount <= 500 ? Math.floor((data.totalAmount*6)/100) : 50;
 
                     return (
                         <div key={data._id || index} className="home-request-card"

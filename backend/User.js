@@ -24,6 +24,15 @@ const UserSchema=new mongoose.Schema({
           enum: ["out","in"],
           default: "in"
     },
+    isseller:{
+        type:Boolean,
+        default:false
+    },
+    upiId:String,
+
+    razorpayContactId:String,
+
+    razorpayFundAccountId:String
 });
 
 module.exports=mongoose.model('User',UserSchema);

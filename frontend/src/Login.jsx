@@ -131,16 +131,15 @@ function Login() {
                 <div className={swapped ? "left-div swapped" : "left-div"}>
                     <div className="login">
                         <h1>Welcome Back</h1>
-                        <p>Continue you process where they left of</p>
-                        <p>consistance is the main key to success so work hard</p>
+                        <p>Continue being delivery person or be lazy</p>
                         <button
                             onClick={swap}
                         >Sign Up</button>
                     </div>
                     <div className="signup">
-                        <h1>Welcome to Portify</h1>
-                        <p>SignUp and Explore the beatiful world</p>
-                        <p>portify is an amazing platform  where you can have your best portifolio</p>
+                        <h1>Welcome to college cart</h1>
+                        <p>SignUp and Explore the lazy world</p>
+                        <p>college cart is an amazing platform  where you can request or accept deliveries</p>
                         <button
                             onClick={swap}
                         >Login</button>

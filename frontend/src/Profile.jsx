@@ -60,8 +60,34 @@ export default function Profile() {
                             navigate("/mydeliveries");
                         }}
                     >Accepted</p>
-                    <p className="docs-p">Docs</p>
-                    <p>Help</p>
+                    <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
+                    <img src={profileImg} className="profile-img"
+                        onClick={() => {
+                            navigate(`/profile/${userId}`);
+                        }}
+                    ></img>
+                </div>
+                <div className={showrightdiv ? "sidebar show" : "sidebar"}>
+                    <button className="display-sidebar-top-btn in"
+                        onClick={() => {
+                            setshowrightdiv(prev => !prev);
+                            setshowEditblur(prev => !prev);
+                        }}
+                    >☰</button>
+                    <p
+                        style={{
+                            backgroundColor: "rgba(0, 140, 255, 1)",
+                            color: "white",
+                            padding: "5px",
+                            borderRadius: "15px"
+                        }}
+                    >Requested</p>
+                    <p
+                        onClick={() => {
+                            navigate("/mydeliveries");
+                        }}
+                    >Accepted</p>
+                    <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
                     <img src={profileImg} className="profile-img"
                         onClick={() => {
                             navigate(`/profile/${userId}`);
@@ -81,7 +107,7 @@ export default function Profile() {
                     {
                         (userId === profileId) && <button className="logout-btn"
                             onClick={() => {
-                                    localStorage.removeItem("userId");
+                                localStorage.removeItem("userId");
                                 localStorage.removeItem("token");
                                 window.location.reload();
                             }}
