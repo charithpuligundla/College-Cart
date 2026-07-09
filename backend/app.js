@@ -22,6 +22,10 @@ app.use(cors());
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const mongodburl = process.env.MONGODBURL;
+const brevo_smtp_login = process.env.BREVO_SMTP_LOGIN;
+const brevo_smtp_key = process.env.BREVO_SMTP_KEY;
+const mail = process.env.EMAIL;
+console.log(`login:${brevo_smtp_login}, key:${brevo_smtp_key},email:${mail}`);
 
 mongoose.connect(mongodburl)
   .then(() => console.log('mongodb connected'))
@@ -39,8 +43,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // true for port 465, false for port 587
   auth: {
-    user: process.env.BREVO_SMTP_LOGIN, // your Brevo SMTP login (found in SMTP & API settings)
-    pass: process.env.BREVO_SMTP_KEY    // your Brevo SMTP key (not your account password)
+    user: brevo_smtp_login,
+    pass: brevo_smtp_key
   }
 });
 
@@ -88,6 +92,7 @@ app.post('/signup', async (req, res) => {
 
     try {
       await transporter.sendMail({
+        from: `college-cart <${mail}>`,
         to: email,
         subject: "Verify your email",
         html: `<a href="${verifyLink}">Verify Email</a>`
@@ -306,6 +311,8 @@ app.post('/reject-request/:requestId', async (req, res) => {
 
   const email1 = requester.email;
   await transporter.sendMail({
+
+    from: `college-cart <${mail}>`,
     to: email1,
     subject: "Request rejected",
     html: `
@@ -315,6 +322,7 @@ app.post('/reject-request/:requestId', async (req, res) => {
   });
   const email2 = accepter.email;
   await transporter.sendMail({
+    from: `college-cart <${mail}>`,
     to: email2,
     subject: "Request rejected",
     html: `
@@ -354,6 +362,7 @@ app.post('/you-rejected/:requestId', async (req, res) => {
 
   const email1 = requester.email;
   await transporter.sendMail({
+    from: `college-cart <${mail}>`,
     to: email1,
     subject: "rejected delivery",
     html: `
@@ -363,6 +372,7 @@ app.post('/you-rejected/:requestId', async (req, res) => {
   });
   const email2 = accepter.email;
   await transporter.sendMail({
+    from: `college-cart <${mail}>`,
     to: email2,
     subject: "rejected delivery",
     html: `
@@ -420,6 +430,7 @@ app.post('/deliveredB/:requestId', async (req, res) => {
 
   const email1 = requester.email;
   await transporter.sendMail({
+    from: `college-cart <${mail}>`,
     to: email1,
     subject: "your order delivered",
     html: `
@@ -429,6 +440,7 @@ app.post('/deliveredB/:requestId', async (req, res) => {
   });
   const email2 = accepter.email;
   await transporter.sendMail({
+    from: `college-cart <${mail}>`,
     to: email2,
     subject: "order delivered",
     html: `
@@ -593,6 +605,7 @@ app.post('/accept-request/:requestId', async (req, res) => {
   const user = await User.findById(requesterId);
   const email = user.email;
   await transporter.sendMail({
+    from: `college-cart <${mail}>`,
     to: email,
     subject: "Request Accepted",
     html: `
@@ -619,6 +632,7 @@ app.post('/cancel-request/:requestId', async (req, res) => {
   const user = await User.findById(requesterId);
   const email = user.email;
   await transporter.sendMail({
+    from: `college-cart <${mail}>`,
     to: email,
     subject: "cancel Request",
     html: `
