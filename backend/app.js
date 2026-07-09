@@ -5,13 +5,13 @@ const jwt = require('jsonwebtoken');
 const User = require('./User');
 const Request = require('./Requestschema.js');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const http = require('http');
 const { Server } = require('socket.io');
 const Chat = require('./ChatSchema.js');
 require('dotenv').config();
 const Razorpay = require('./Razorpay.js');
 const crypto = require("crypto");
+const { sendEmail } = require('./services/emailService');
 
 const backenduri="https://college-cart-epzl.onrender.com";
 // const backenduri = "http://localhost:5000";
@@ -22,10 +22,8 @@ app.use(cors());
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const mongodburl = process.env.MONGODBURL;
-const brevo_smtp_login = process.env.BREVO_SMTP_LOGIN;
-const brevo_smtp_key = process.env.BREVO_SMTP_KEY;
 const mail = process.env.EMAIL;
-console.log(`login:${brevo_smtp_login}, key:${brevo_smtp_key},email:${mail}`);
+console.log(`email:${mail}`);
 
 mongoose.connect(mongodburl)
   .then(() => console.log('mongodb connected'))
@@ -36,18 +34,6 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*' }
 });
-
-
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false, // true for port 465, false for port 587
-  auth: {
-    user: brevo_smtp_login,
-    pass: brevo_smtp_key
-  }
-});
-
 
 const protect = (req, res, next) => {
   let token;
@@ -91,8 +77,7 @@ app.post('/signup', async (req, res) => {
     const verifyLink = `${backenduri}/verify-email/${token}`;
 
     try {
-      await transporter.sendMail({
-        from: `college-cart <${mail}>`,
+      await sendEmail({
         to: email,
         subject: "Verify your email",
         html: `<a href="${verifyLink}">Verify Email</a>`
@@ -310,26 +295,31 @@ app.post('/reject-request/:requestId', async (req, res) => {
   const requester = await User.findById(requesterId);
 
   const email1 = requester.email;
-  await transporter.sendMail({
-
-    from: `college-cart <${mail}>`,
-    to: email1,
-    subject: "Request rejected",
-    html: `
+  try {
+    await sendEmail({
+      to: email1,
+      subject: "Request rejected",
+      html: `
         <p>your request has been rejected by ${accepter.userName} go to the website to know more.</p>
         <p>Be lazy be happy</p>
       `
-  });
+    });
+  } catch (error) {
+    console.error('Failed to send rejection email to requester:', error);
+  }
   const email2 = accepter.email;
-  await transporter.sendMail({
-    from: `college-cart <${mail}>`,
-    to: email2,
-    subject: "Request rejected",
-    html: `
+  try {
+    await sendEmail({
+      to: email2,
+      subject: "Request rejected",
+      html: `
         <p>you rejected the request posted by ${requester.userName}.</p>
         <p>Be lazy be happy</p>
       `
-  });
+    });
+  } catch (error) {
+    console.error('Failed to send rejection email to accepter:', error);
+  }
   res.status(200).json({ message: "Request rejected successfully" });
 });
 
@@ -361,25 +351,31 @@ app.post('/you-rejected/:requestId', async (req, res) => {
   const requester = await User.findById(requesterId);
 
   const email1 = requester.email;
-  await transporter.sendMail({
-    from: `college-cart <${mail}>`,
-    to: email1,
-    subject: "rejected delivery",
-    html: `
+  try {
+    await sendEmail({
+      to: email1,
+      subject: "rejected delivery",
+      html: `
         <p>you rejected ${accepter.userName} as delivery person</p>
         <p>Be lazy be happy</p>
       `
-  });
+    });
+  } catch (error) {
+    console.error('Failed to send delivery rejection email to requester:', error);
+  }
   const email2 = accepter.email;
-  await transporter.sendMail({
-    from: `college-cart <${mail}>`,
-    to: email2,
-    subject: "rejected delivery",
-    html: `
+  try {
+    await sendEmail({
+      to: email2,
+      subject: "rejected delivery",
+      html: `
         <p>you have been rejected as delivery person by ${requester.userName}.</p>
         <p>Be lazy be happy</p>
       `
-  });
+    });
+  } catch (error) {
+    console.error('Failed to send delivery rejection email to accepter:', error);
+  }
   res.status(200).json({ message: "Request rejected successfully" });
 });
 
@@ -429,25 +425,31 @@ app.post('/deliveredB/:requestId', async (req, res) => {
   });
 
   const email1 = requester.email;
-  await transporter.sendMail({
-    from: `college-cart <${mail}>`,
-    to: email1,
-    subject: "your order delivered",
-    html: `
+  try {
+    await sendEmail({
+      to: email1,
+      subject: "your order delivered",
+      html: `
         <p>your order deleverd by ${accepter.userName}</p>
         <p>Be lazy be happy</p>
       `
-  });
+    });
+  } catch (error) {
+    console.error('Failed to send delivered email to requester:', error);
+  }
   const email2 = accepter.email;
-  await transporter.sendMail({
-    from: `college-cart <${mail}>`,
-    to: email2,
-    subject: "order delivered",
-    html: `
+  try {
+    await sendEmail({
+      to: email2,
+      subject: "order delivered",
+      html: `
         <p>you have been delivered order for ${requester.userName}.</p>
         <p>Be lazy be happy</p>
       `
-  });
+    });
+  } catch (error) {
+    console.error('Failed to send delivered email to accepter:', error);
+  }
   res.status(200).json({ message: "Order deliverd successfully" });
 });
 
@@ -604,15 +606,18 @@ app.post('/accept-request/:requestId', async (req, res) => {
 
   const user = await User.findById(requesterId);
   const email = user.email;
-  await transporter.sendMail({
-    from: `college-cart <${mail}>`,
-    to: email,
-    subject: "Request Accepted",
-    html: `
+  try {
+    await sendEmail({
+      to: email,
+      subject: "Request Accepted",
+      html: `
         <p>your request has been accepted go to the website and make payment to procced.</p>
         <p>Be lazy be happy</p>
       `
-  });
+    });
+  } catch (error) {
+    console.error('Failed to send acceptance email:', error);
+  }
 
 
   res.json({ chatId: chat._id });
@@ -631,15 +636,18 @@ app.post('/cancel-request/:requestId', async (req, res) => {
 
   const user = await User.findById(requesterId);
   const email = user.email;
-  await transporter.sendMail({
-    from: `college-cart <${mail}>`,
-    to: email,
-    subject: "cancel Request",
-    html: `
+  try {
+    await sendEmail({
+      to: email,
+      subject: "cancel Request",
+      html: `
         <p>you cancelled your request go to the website to know more.</p>
         <p>Be lazy be happy</p>
       `
-  });
+    });
+  } catch (error) {
+    console.error('Failed to send cancellation email:', error);
+  }
 
   res.status(200).json({ message: "Request cancelled successfully" });
 });
