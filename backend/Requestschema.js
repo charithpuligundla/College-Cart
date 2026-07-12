@@ -17,7 +17,7 @@ const RequestSchema = new mongoose.Schema(
     },
     status: {
           type: String,
-          enum: ["pending", "accepted","paid", "deliveredA","deliveredB", "cancelled"],
+          enum: ["pending", "accepted", "deliveredA","deliveredB", "cancelled"],
           default: "pending"
         },
     totalAmount: {
@@ -32,14 +32,6 @@ const RequestSchema = new mongoose.Schema(
       type:Number,
       default:0
     },
-    sellerAmount: {
-      type: Number,
-      required: true
-    },
-    razorpayOrderId:String,
-    razorpayPaymentId:String,
-    razorpaySignature:String,
-    razorpayTransferId:String,
     rejected:[
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -60,6 +52,10 @@ const RequestSchema = new mongoose.Schema(
       }
     ],
     acceptedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    ispremium:{
+      type:Boolean,
+      default:false
+    }
   }, 
   { timestamps: true }
 );

@@ -8,13 +8,14 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const Chat = require('./ChatSchema.js');
+const Product = require('./ProductSchema.js');
 require('dotenv').config();
-const Razorpay = require('./Razorpay.js');
+// const Razorpay = require('./Razorpay.js');
 const crypto = require("crypto");
 const { sendEmail } = require('./services/emailService');
 
-const backenduri="https://college-cart-epzl.onrender.com";
-// const backenduri = "http://localhost:5000";
+// const backenduri="https://college-cart-epzl.onrender.com";
+const backenduri = "http://localhost:5000";
 
 const app = express();
 app.use(express.json());
@@ -54,12 +55,47 @@ const protect = (req, res, next) => {
   }
 };
 
+const calculateDeliveryFee = (totalAmount, isPremium) => {
+  const rate = isPremium ? 0.08 : 0.06;
+  let fee = Math.floor(totalAmount * rate);
+  if (fee < 5) fee = 5;
+  if (fee > 50) fee = 50;
+  return fee;
+};
+
+const checkAndExpirePremium = async (request) => {
+  if (request.ispremium) {
+    const now = new Date();
+    const created = new Date(request.createdAt);
+    if ((now - created) > 60 * 60 * 1000) {
+      request.ispremium = false;
+      request.deliveryFee = calculateDeliveryFee(request.totalAmount, false);
+      request.amountToPay = request.totalAmount + request.deliveryFee;
+      await request.save();
+    }
+  }
+};
 
 app.post('/signup', async (req, res) => {
   const { userName, email, password } = req.body;
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'User already exists' });
+    if (existingUser) {
+      const token = jwt.sign({ id: existingUser._id, email: existingUser.email }, JWT_SECRET, { expiresIn: '30d' });
+      const verifyLink = `${backenduri}/verify-email/${token}`;
+      try {
+        await sendEmail({
+          to: email,
+          subject: "Verify your email",
+          html: `<a href="${verifyLink}">Verify Email</a>`
+        });
+        console.log("✅ Mail sent");
+      } catch (err) {
+        console.error("❌ Mail error:", err);
+      }
+
+      res.status(200).json({ message: "Verification email sent", token, user: newUser });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
@@ -68,7 +104,8 @@ app.post('/signup', async (req, res) => {
       password: hashedPassword,
       degree: req.body.degree,
       branch: req.body.branch,
-      year: req.body.year
+      year: req.body.year,
+      mobileNumber: req.body.number,
     });
     await newUser.save();
 
@@ -143,23 +180,9 @@ app.post('/getuser', async (req, res) => {
 });
 
 app.post('/request', async (req, res) => {
-  const { userId, description, address, totalAmount, requested } = req.body;
-  let deliveryFee = Math.floor(totalAmount * 0.06);
-  if (deliveryFee < 5) deliveryFee = 5;
-  else if (deliveryFee > 50) deliveryFee = 50;
-  let amountToPay = totalAmount + deliveryFee + Math.ceil(totalAmount * 0.04);
-  let sellerAmount = totalAmount + deliveryFee;
-  let razorpayOrder;
-  try {
-    razorpayOrder = await Razorpay.orders.create({
-      amount: amountToPay * 100,
-      currency: "INR",
-      receipt: "receipt_" + Date.now()
-    });
-  } catch (err) {
-    console.error('Razorpay order creation failed:', err.message || err);
-    return res.status(502).json({ message: 'Failed to create Razorpay order', error: err.message || err });
-  }
+  const { userId, description, address, totalAmount, requested, ispremium } = req.body;
+  let deliveryFee = calculateDeliveryFee(totalAmount, Boolean(ispremium));
+  let amountToPay = totalAmount + deliveryFee;
   try {
     const newRequest = new Request({
       userId,
@@ -168,13 +191,50 @@ app.post('/request', async (req, res) => {
       totalAmount,
       amountToPay,
       deliveryFee,
-      sellerAmount,
       requested,
-      razorpayOrderId: razorpayOrder.id
+      ispremium: Boolean(ispremium),
     });
     await newRequest.save();
     await User.findByIdAndUpdate(userId, { $inc: { no_requests: 1 } });
     res.status(201).json({ message: 'Request created successfully', request: newRequest });
+  } catch (err) {
+    res.status(500).json({ message: 'Something went wrong', error: err.message });
+  }
+});
+
+app.put('/request/:requestId', async (req, res) => {
+  try {
+    const { userId, description, address, totalAmount, requested, ispremium } = req.body;
+    const request = await Request.findById(req.params.requestId);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Request not found' });
+    }
+
+    await checkAndExpirePremium(request);
+
+    if (request.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'You can only update your own requests' });
+    }
+
+    if (request.status !== 'pending') {
+      return res.status(400).json({ message: 'Only pending requests can be updated' });
+    }
+
+    let deliveryFee = calculateDeliveryFee(totalAmount, Boolean(ispremium));
+    let amountToPay = totalAmount + deliveryFee;
+
+    request.description = description;
+    request.address = address;
+    request.totalAmount = totalAmount;
+    request.ispremium = Boolean(ispremium);
+    request.amountToPay = amountToPay;
+    request.deliveryFee = deliveryFee;
+    request.requested = requested;
+
+    await request.save();
+
+    res.status(200).json({ message: 'Request updated successfully', request });
   } catch (err) {
     res.status(500).json({ message: 'Something went wrong', error: err.message });
   }
@@ -194,43 +254,6 @@ app.post('/getrequest', async (req, res) => {
   }
 
 })
-
-app.post('/verify-payment', async (req, res) => {
-  try {
-    const { dbOrderId, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-
-    // 1. Generate the expected signature
-    const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
-    hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
-    const generatedSignature = hmac.digest("hex");
-
-    // 2. Validate signatures
-    if (generatedSignature !== razorpay_signature) {
-      return res.status(400).json({ success: false, message: "Payment verification failed" });
-    }
-
-    // 3. Update the MongoDB Order to "Paid"
-
-    const updatedOrder = await Request.findByIdAndUpdate(
-      dbOrderId,
-      {
-        razorpayPaymentId: razorpay_payment_id,
-        razorpaySignature: razorpay_signature,
-        status: "paid"
-      },
-      { new: true }
-    );
-
-    res.json({
-      success: true,
-      message: "Payment verified and order updated successfully!",
-      order: updatedOrder
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Payment verification process failed" });
-  }
-});
 
 
 app.get('/getrequests', async (req, res) => {
@@ -277,6 +300,8 @@ app.post('/reject-request/:requestId', async (req, res) => {
 
   const request = await Request.findById(req.params.requestId);
   if (!request) return res.status(404).json({ message: 'Request not found' });
+
+  await checkAndExpirePremium(request);
 
   let chat = await Chat.findOne({
     requestId: request._id
@@ -334,6 +359,8 @@ app.post('/you-rejected/:requestId', async (req, res) => {
   const request = await Request.findById(req.params.requestId);
   if (!request) return res.status(404).json({ message: 'Request not found' });
 
+  await checkAndExpirePremium(request);
+
   let chat = await Chat.findOne({
     requestId: request._id
   });
@@ -389,6 +416,8 @@ app.post('/deliveredA/:requestId', async (req, res) => {
   const request = await Request.findById(req.params.requestId);
   if (!request) return res.status(404).json({ message: 'Request not found' });
 
+  await checkAndExpirePremium(request);
+
   let chat = await Chat.findOne({
     requestId: request._id
   });
@@ -414,8 +443,14 @@ app.post('/deliveredB/:requestId', async (req, res) => {
   const request = await Request.findById(req.params.requestId);
   if (!request) return res.status(404).json({ message: 'Request not found' });
 
+  await checkAndExpirePremium(request);
+
+  const completedAt = new Date();
+  const deliveryFee = calculateDeliveryFee(request.totalAmount, request.ispremium);
 
   request.status = 'deliveredB';
+  request.deliveryFee = deliveryFee;
+  request.amountToPay = request.totalAmount + deliveryFee;
   await request.save();
   const accepter = await User.findById(accepterId);
   const requester = await User.findById(requesterId);
@@ -453,133 +488,13 @@ app.post('/deliveredB/:requestId', async (req, res) => {
   res.status(200).json({ message: "Order deliverd successfully" });
 });
 
-// exports.releasePayment = async (req, res) => {
-//     try {
-
-//         const { orderId } = req.params;
-
-//         const order = await Order.findById(orderId);
-
-//         if (!order) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Order not found"
-//             });
-//         }
-
-//         if (order.paymentStatus !== "Paid") {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Payment not captured yet"
-//             });
-//         }
-
-//         if (order.razorpayTransferId) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Payment already released"
-//             });
-//         }
-
-//         const seller = await User.findById(order.seller);
-
-//         if (!seller) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Seller not found"
-//             });
-//         }
-
-//         if (!seller.razorpayFundAccountId) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Seller fund account missing"
-//             });
-//         }
-
-//         //----------------------------------------------------
-//         // Create payout
-//         //----------------------------------------------------
-
-//         const payout = await axios.post(
-
-//             "https://api.razorpay.com/v1/payouts",
-
-//             {
-//                 account_number: process.env.RAZORPAYX_ACCOUNT_NUMBER,
-
-//                 fund_account_id: seller.razorpayFundAccountId,
-
-//                 amount: order.sellerAmount * 100,
-
-//                 currency: "INR",
-
-//                 mode: "UPI",
-
-//                 purpose: "payout",
-
-//                 queue_if_low_balance: true,
-
-//                 reference_id: order._id.toString(),
-
-//                 narration: "Marketplace Order Payment"
-//             },
-
-//             {
-//                 auth: {
-//                     username: process.env.RAZORPAY_KEY_ID,
-//                     password: process.env.RAZORPAY_KEY_SECRET
-//                 },
-//                 headers: {
-//                     "X-Payout-Idempotency":
-//                         `release-${order._id}`
-//                 }
-//             }
-
-//         );
-
-//         //----------------------------------------------------
-
-//         order.paymentStatus = "Released";
-
-//         order.razorpayTransferId = payout.data.id;
-
-//         await order.save();
-
-//         //----------------------------------------------------
-
-//         res.json({
-
-//             success: true,
-
-//             message: "Seller paid successfully",
-
-//             payout: payout.data
-
-//         });
-
-//     }
-
-//     catch (err) {
-
-//         console.log(err.response?.data || err);
-
-//         res.status(500).json({
-
-//             success: false,
-
-//             error: err.response?.data || err.message
-
-//         });
-
-//     }
-// };
-
 app.post('/accept-request/:requestId', async (req, res) => {
   const { accepterId, requesterId } = req.body;
 
   const request = await Request.findById(req.params.requestId);
   if (!request) return res.status(404).json({ message: 'Request not found' });
+
+  await checkAndExpirePremium(request);
 
   if (request.rejected.includes(accepterId)) {
     return res.status(400).json({
@@ -628,6 +543,8 @@ app.post('/cancel-request/:requestId', async (req, res) => {
 
   const request = await Request.findById(req.params.requestId);
   if (!request) return res.status(404).json({ message: 'Request not found' });
+
+  await checkAndExpirePremium(request);
 
   if (request.status != "pending") return res.status(401).json({ message: 'Request cant be cancelled' });
 
@@ -710,79 +627,159 @@ app.post('/changestatus', async (req, res) => {
   res.json(user);
 });
 
-app.get("/razor", async (req, res) => {
 
+app.get('/product-search', async (req, res) => {
   try {
 
-    const order = await Razorpay.orders.create({
+    const query = req.query.q?.trim();
 
-      amount: 100,
+    if (!query) {
+      return res.status(200).json([]);
+    }
 
-      currency: "INR"
+    const products = await Product.aggregate([
+      {
+        $search: {
+          index: "product-search",
+          compound: {
+            should: [
 
-    });
-    console.log(order);
-    res.json(order);
+              {
+                autocomplete: {
+                  query: query,
+                  path: "name",
+                  fuzzy: {
+                    maxEdits: 1,
+                    prefixLength: 2
+                  },
+                  score: {
+                    boost: {
+                      value: 10
+                    }
+                  }
+                }
+              },
+
+              {
+                autocomplete: {
+                  query: query,
+                  path: "brand",
+                  fuzzy: {
+                    maxEdits: 1,
+                    prefixLength: 2
+                  },
+                  score: {
+                    boost: {
+                      value: 8
+                    }
+                  }
+                }
+              },
+
+              {
+                autocomplete: {
+                  query: query,
+                  path: "type",
+                  fuzzy: {
+                    maxEdits: 1,
+                    prefixLength: 2
+                  },
+                  score: {
+                    boost: {
+                      value: 6
+                    }
+                  }
+                }
+              },
+
+              {
+                autocomplete: {
+                  query: query,
+                  path: "subcategory",
+                  fuzzy: {
+                    maxEdits: 1,
+                    prefixLength: 2
+                  },
+                  score: {
+                    boost: {
+                      value: 4
+                    }
+                  }
+                }
+              },
+
+              {
+                autocomplete: {
+                  query: query,
+                  path: "category",
+                  fuzzy: {
+                    maxEdits: 1,
+                    prefixLength: 2
+                  },
+                  score: {
+                    boost: {
+                      value: 3
+                    }
+                  }
+                }
+              }
+
+            ],
+            minimumShouldMatch: 1
+          }
+        }
+      },
+
+      {
+        $limit: 10
+      },
+
+      {
+        $project: {
+
+          _id: 1,
+
+          productId: 1,
+
+          name: 1,
+
+          brand: 1,
+
+          type: 1,
+
+          subcategory: 1,
+
+          category: 1,
+
+          weight: 1,
+
+          mrp: 1,
+
+          image_url: 1,
+
+          score: {
+            $meta: "searchScore"
+          }
+
+        }
+      }
+
+    ]);
+
+    res.status(200).json(products);
 
   }
-
   catch (err) {
 
-    res.status(500).json(err);
-
-  }
-
-});
-
-app.post("/add-seller", async (req, res) => {
-  try {
-    const { upiId, phone } = req.body;
-
-    if (!upiId) {
-      return res.status(400).json({ message: "UPI ID is required" });
-    }
-
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const contact = await razorpay.contacts.create({
-      name: user.username,
-      email: user.email,
-      contact: phone || user.phone,
-      type: "vendor"
-    });
-
-    const fundAccount = await razorpay.fundAccounts.create({
-      contact_id: contact.id,
-      account_type: "vpa",
-      vpa: {
-        address: upiId
-      }
-    });
-
-    user.isseller = true;
-    user.upiId = upiId;
-    user.razorpayContactId = contact.id;
-    user.razorpayFundAccountId = fundAccount.id;
-
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Seller Registered successfully",
-      seller: user
-    });
-
-  } catch (err) {
     console.error(err);
+
     res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-      error: err.message
+      message: "Search failed."
     });
+
   }
 });
+
 
 const PORT = process.env.PORT || 5000;
 

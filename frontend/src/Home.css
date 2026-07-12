@@ -162,6 +162,10 @@ body {
     pointer-events: auto;
 }
 
+.blurscreens.load.show{
+    z-index: 101;
+}
+
 .profile-img {
     width: 40px;
     height: 40px;
@@ -275,6 +279,28 @@ body {
     background: linear-gradient(135deg, #f0fff6 0%, white 100%);
 }
 
+.home-request-card.premium::before {
+    background: linear-gradient(180deg, #e60041, #c8008c);
+}
+
+.home-request-card.premium {
+    border-color: rgba(230, 0, 0, 0.2);
+    background: linear-gradient(135deg, #fff7f0 0%, white 100%);
+}
+
+.premium-badge {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: linear-gradient(135deg, #e6008a, #5d00c8);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+}
+
 .own-badge {
     position: absolute;
     top: 14px;
@@ -382,7 +408,7 @@ body {
     background: #ffffff;
     height: 90vh;
     width: 80vw;
-    z-index: 100;
+    z-index: 80;
     top: 2vh;
     left: 4vw;
     border-radius: 20px;

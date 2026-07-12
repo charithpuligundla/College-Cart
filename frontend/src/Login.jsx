@@ -19,7 +19,8 @@ function Login() {
         userName: "",
         email: "",
         password: "",
-        conformPassword: ""
+        conformPassword: "",
+        number:""
     });
     const [match, setMatch] = useState(false);
     const [isgamilerror1, setIsgamilerror1] = useState(false);
@@ -69,7 +70,7 @@ function Login() {
 
     function signup(e) {
         e.preventDefault();
-        if (signupData.email === "" || signupData.password === "" || signupData.conformPassword === "" || signupData.userName === "") {
+        if (signupData.email === "" || signupData.password === "" || signupData.conformPassword === "" || signupData.userName === ""||signupData.number === "") {
             alert("All fields are required.");
             return;
         }
@@ -82,13 +83,18 @@ function Login() {
             alert("Both passwords are not matching.");
             return;
         }
+        if(signupData.number.length!==10){
+            alert("Please enter a valid phone number.");
+            return;
+        }
         axios.post(`${backenduri}/signup`, {
             userName: signupData.userName,
             email: signupData.email,
             password: signupData.password,
             degree:degree,
             branch:branch,
-            year:year
+            year:year,
+            number:signupData.number
         }).then(response => {
             console.log(response);
             localStorage.setItem("userId", response.data.user._id);
@@ -257,6 +263,13 @@ function Login() {
                                 </span>
                                 <label >Conform Password</label>
                                 <p className={match ? "pass-notmatch-note" : "pass-notmatch-note show"}>Both passwords are not matching.</p>
+                            </div>
+                            <div className="input-group">
+                                <input type="number" className="signup-number" required
+                                    value={signupData.number}
+                                    onChange={(e) => setSignupData({ ...signupData, number: e.target.value })}
+                                />
+                                <label>Phone Number</label>
                             </div>
                             <div className="acedamic-details-div">
                                 <select className="degree-select"

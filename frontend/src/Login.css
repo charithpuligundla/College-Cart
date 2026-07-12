@@ -1,8 +1,8 @@
 .login-main-div{
-    height:80vh;
+    height:90vh;
     width:80vw;
     margin:auto;
-    margin-top:10vh;
+    margin-top:5vh;
     display:flex;
     transition:all 1s ease;
     background-color: rgb(255, 255, 255);

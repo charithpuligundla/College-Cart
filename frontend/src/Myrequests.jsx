@@ -131,13 +131,6 @@ export default function Myrequests() {
                             month: "short",
                             year: "numeric"
                         });
-                        let deliveryfee;
-                        if (data.totalAmount <= 500) {
-                            deliveryfee = Math.floor((data.totalAmount*6)/100);
-                        } else {
-                            deliveryfee = 50;
-                        }
-                        if(deliveryfee<5) deliveryfee=5;
 
                         return (
                             <div
@@ -154,7 +147,6 @@ export default function Myrequests() {
                                         data.status === "accepted" ? "linear-gradient(135deg,#00c853,#69f0ae)" :
                                             data.status === "pending" ? "linear-gradient(135deg,#e53935,#ef9a9a)" :
                                                 data.status === "delivered" ? "linear-gradient(135deg,#0288d1,#29b6f6)" :
-                                                    data.status === "paid" ? "linear-gradient(135deg,#f8ff28,#ffef88)" :
                                                         "linear-gradient(135deg,#757575,#bdbdbd)"
                                 }}>{data.status}</div>
 
@@ -166,7 +158,7 @@ export default function Myrequests() {
                                         <p className="card-username">{data.userId.userName}</p>
                                         <p className="card-time">{formatted}</p>
                                     </div>
-                                    <div className="card-fee-chip">₹{deliveryfee} fee</div>
+                                    <div className="card-fee-chip">₹{data.deliveryFee} fee</div>
                                 </div>
 
                                 <p className="card-desc">"{data.description}"</p>
@@ -203,13 +195,6 @@ export default function Myrequests() {
                                         }}
                                         onClick={() => { navigate(`/chat/${data.chatId}`) }}
                                     >chat</button>
-                                    <button className="payment-btn"
-                                        style={{
-                                            display: (data.status !== "accepted")
-                                                ? "none" : ""
-                                        }}
-                                        onClick={() => {navigate(`/payment/${data._id}`)}}
-                                    >Make payment</button>
                                     <button className="make-payment-btn"
                                     style={{ display: data.status !== "deliveredA" ? "none" : "" }}
                                     onClick={() => {
@@ -269,6 +254,13 @@ export default function Myrequests() {
                                             );
                                         }}
                                     >cancel request</button>
+                                    <button className="edit-item-btn"
+                                        style={{ display: data.status !== "pending" ? "none" : "" }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/updaterequest/${data._id}`);
+                                        }}
+                                    >update request</button>
                                 </div>
                             </div>
                         );

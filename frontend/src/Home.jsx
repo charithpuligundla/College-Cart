@@ -4,6 +4,7 @@ import profileImg from "./images/cart-logo.png"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import CountdownTimer from "./Timer";
+import Loader from "./Loader";
 
 export default function Home() {
     const [requestdata, setrequestdata] = useState([]);
@@ -18,6 +19,7 @@ export default function Home() {
     const [outpeople, setoutpeople] = useState([]);
     const [ownreq, setownreq] = useState(false);
     const backenduri = import.meta.env.VITE_BACKENDURI;
+    const [isloading,setisloading]=useState(false);
 
 
     useEffect(() => {
@@ -27,8 +29,21 @@ export default function Home() {
             },
         })
             .then(res => {
-                console.log(res);
-                setrequestdata(res.data);
+                const processedData = res.data.map(req => {
+                    if (req.ispremium) {
+                        const d = new Date(req.createdAt);
+                        const now = new Date();
+                        if ((now - d) > 60 * 60 * 1000) {
+                            req.ispremium = false;
+                            let fee = Math.floor(req.totalAmount * 0.06);
+                            if (fee < 5) fee = 5;
+                            if (fee > 50) fee = 50;
+                            req.deliveryFee = fee;
+                        }
+                    }
+                    return req;
+                });
+                setrequestdata(processedData);
             })
             .catch(error => {
                 alert(error.response.data.message);
@@ -147,6 +162,8 @@ export default function Home() {
                             ></img>
                         </div>
                         <div className={showEditblur ? "blurscreens show" : "blurscreens"}></div>
+                        <div className={isloading?"blurscreens show load":""}></div>
+                        {isloading&&<Loader/>}
                         <div className="top-buttons">
                             <button className="explr-req"
                                 style={{ backgroundColor: "rgb(195, 244, 255)" }}
@@ -174,18 +191,12 @@ export default function Home() {
                                             month: "short",
                                             year: "numeric"
                                         });
-                                        let deliveryfee;
-                                        if (data.totalAmount <= 500) {
-                                            deliveryfee = Math.floor((data.totalAmount*6)/100);
-                                        } else {
-                                            deliveryfee = 50;
-                                        }
                                         let issame = userId === (data.userId ? data.userId._id : data.userId);
                                         let status = data.status;
                                         return (
                                             <div
                                                 key={data._id}
-                                                className={issame ? "home-request-card own" : "home-request-card"}
+                                                className={`home-request-card ${issame ? 'own' : ''} ${data.ispremium ? 'premium' : ''}`}
                                                 onClick={() => {
                                                     setprevindex(index);
                                                     setshowpreview(true);
@@ -195,6 +206,7 @@ export default function Home() {
                                                 style={{ display: (status === "pending") ? "block" : "none" }}
                                             >
                                                 {issame && <div className="own-badge">Your Request</div>}
+                                                {data.ispremium && !issame && <div className="premium-badge">⭐ Premium</div>}
                                                 <div className="card-header-row">
                                                     <div className="card-avatar">
                                                         {data.userId?.userName?.[0]?.toUpperCase() || "?"}
@@ -203,7 +215,7 @@ export default function Home() {
                                                         <p className="card-username">{data.userId?.userName}</p>
                                                         <p className="card-time">{formatted}</p>
                                                     </div>
-                                                    <div className="card-fee-chip">₹{deliveryfee} fee</div>
+                                                    <div className="card-fee-chip">₹{data.deliveryFee} fee</div>
                                                 </div>
                                                 <p className="card-desc">"{data.description}"</p>
                                                 <div className="card-meta-row">
@@ -291,7 +303,7 @@ export default function Home() {
                                             <div className="info-card highlight-card">
                                                 <span className="info-label">You Earn</span>
                                                 <span className="info-value earn-value">
-                                                    ₹{requestdata[previndex].totalAmount <= 500 ? requestdata[previndex].totalAmount / 10 : 50}
+                                                    ₹{requestdata[previndex].deliveryFee}
                                                 </span>
                                             </div>
                                         )}
@@ -332,6 +344,7 @@ export default function Home() {
                                                 className="accept-btn"
                                                 onClick={
                                                     async () => {
+                                                        setisloading(true);
                                                         await axios.post(
                                                             `${backenduri}/accept-request/${requestdata[previndex]._id}`,
                                                             { accepterId: userId, requesterId: requestdata[previndex].userId._id },

@@ -80,7 +80,6 @@ export default function Mydeliveries() {
                         hour: "2-digit", minute: "2-digit", hour12: true,
                         day: "2-digit", month: "short", year: "numeric"
                     });
-                    const deliveryfee = data.totalAmount <= 500 ? Math.floor((data.totalAmount*6)/100) : 50;
 
                     return (
                         <div key={data._id || index} className="home-request-card"
@@ -96,12 +95,12 @@ export default function Mydeliveries() {
                             }}>{data.status}</div>
 
                             <div className="card-header-row">
-                                <div className="card-avatar">{data.userId.userName?.[0]?.toUpperCase() || "?"}</div>
+                                <div className="card-avatar">{data.userId?.userName?.[0]?.toUpperCase() || "?"}</div>
                                 <div>
-                                    <p className="card-username">{data.userId.userName}</p>
+                                    <p className="card-username">{data.userId?.userName}</p>
                                     <p className="card-time">{formatted}</p>
                                 </div>
-                                <div className="card-fee-chip">Rs.{deliveryfee} fee</div>
+                                <div className="card-fee-chip">Rs.{data.deliveryFee} fee</div>
                             </div>
 
                             <p className="card-desc">"{data.description}"</p>
@@ -114,7 +113,7 @@ export default function Mydeliveries() {
 
                             <div className="req-card-btn-div" onClick={e => e.stopPropagation()}>
                                 <button className="see-who-btn"
-                                    onClick={() => { navigate(`/profile/${data.userId._id}`); }}
+                                    onClick={() => { navigate(`/profile/${data.userId?._id}`); }}
                                 >see who</button>
                                 <button className="make-payment-btn"
                                     style={{ display: data.status !== "paid" ? "none" : "" }}
@@ -124,7 +123,7 @@ export default function Mydeliveries() {
                                             "The order will be mark as deliverd . This cannot be undone.",
                                             () => {
                                                 const accepterId = data.acceptedBy;
-                                                const requesterId = data.userId._id;
+                                                const requesterId = data.userId?._id;
                                                 axios.post(`${backenduri}/deliveredA/${data._id}`, { accepterId, requesterId }, {
                                                     headers: {
                                                         Authorization: `Bearer ${token}`,
@@ -148,7 +147,7 @@ export default function Mydeliveries() {
                                             "You will be unassigned from this delivery. The request will be reposted for others.",
                                             () => {
                                                 const accepterId = data.acceptedBy;
-                                                const requesterId = data.userId._id;
+                                                const requesterId = data.userId?._id;
                                                 axios.post(`${backenduri}/reject-request/${data._id}`, { accepterId, requesterId }, {
                                                     headers: {
                                                         Authorization: `Bearer ${token}`,
@@ -174,9 +173,9 @@ export default function Mydeliveries() {
                 {mydeliveries[previndex] &&
                     <div>
                         <div className="preview-modal-header">
-                            <div className="preview-avatar">{mydeliveries[previndex].userId.userName?.[0]?.toUpperCase()}</div>
+                            <div className="preview-avatar">{mydeliveries[previndex].userId?.userName?.[0]?.toUpperCase()}</div>
                             <div>
-                                <p className="preview-username">{mydeliveries[previndex].userId.userName}</p>
+                                <p className="preview-username">{mydeliveries[previndex].userId?.userName}</p>
                                 <p className="preview-subtitle">{mydeliveries[previndex].requested.length} items · Rs.{mydeliveries[previndex].totalAmount}</p>
                             </div>
                         </div>
@@ -189,7 +188,7 @@ export default function Mydeliveries() {
                             <div className="info-card highlight-card">
                                 <span className="info-label">You Earn</span>
                                 <span className="info-value earn-value">
-                                    Rs.{mydeliveries[previndex].totalAmount <= 500 ? mydeliveries[previndex].totalAmount / 10 : 50}
+                                    Rs.{mydeliveries[previndex].deliveryFee}
                                 </span>
                             </div>
                             <div className="info-card">
