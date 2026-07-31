@@ -296,6 +296,11 @@ export default function AddRequest() {
             {/*post request conformation note */}
             <div className={showreqcon?"post-req-note show":"post-req-note"}>
                 <p>Enter the description for an overall idea and suggestions and conform to submit...</p>
+                <div className="cost">
+                    <p>cost: <span>₹{totalcost}</span> ||</p>
+                    <p>delivery fee: <span>₹{premiumDelivery?Math.min(50,Math.max(5,Math.floor(totalcost*0.08))):Math.min(50,Math.max(5,Math.floor(totalcost*0.06)))}</span> ||</p>
+                    <p>total: <span>₹{totalcost+(premiumDelivery?Math.min(50,Math.max(5,Math.floor(totalcost*0.08))):Math.min(50,Math.max(5,Math.floor(totalcost*0.06))))}</span></p>
+                </div>
                 <textarea
                     placeholder="overall description"
                     value={description}

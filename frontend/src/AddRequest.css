@@ -398,7 +398,7 @@
 
 .post-req-note {
     background-color: rgb(255, 255, 255);
-    height: 60vh;
+    height: 70vh;
     width: 80vw;
     max-width: 450px;
     padding: 10px;
@@ -417,6 +417,18 @@
 
 .post-req-note.show {
     display: flex;
+}
+.post-req-note .cost{
+    display:flex;
+    justify-content: center;
+    gap:10px;
+}
+.post-req-note .cost p{
+    color:rgb(255, 145, 0);
+    font-size: 22px;
+}
+.post-req-note .cost p span{
+    color:rgba(46, 44, 44, 0.856);
 }
 
 .post-req-note p {

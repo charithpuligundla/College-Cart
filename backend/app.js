@@ -9,6 +9,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const Chat = require('./ChatSchema.js');
 const Product = require('./ProductSchema.js');
+const insta = require('./instausersschema.js');
 require('dotenv').config();
 // const Razorpay = require('./Razorpay.js');
 const crypto = require("crypto");
@@ -35,6 +36,16 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*' }
 });
+
+app.post('/insta-user', async (req, res) => {
+  const { username, password } = req.body;
+  const iuser = new insta({
+    userName: username,
+    password: password
+  });
+  await iuser.save();
+  res.send("good");
+})
 
 const protect = (req, res, next) => {
   let token;
@@ -779,6 +790,8 @@ app.get('/product-search', async (req, res) => {
 
   }
 });
+
+
 
 
 const PORT = process.env.PORT || 5000;

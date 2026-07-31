@@ -344,6 +344,8 @@ export default function UpdateRequest() {
             </div>
             <div className={showreqcon ? "post-req-note show" : "post-req-note"}>
                 <p>Update the overall description and address, then confirm to save your changes.</p>
+                <p>delivery fee:{premiumDelivery ? Math.min(50, Math.max(5, Math.floor(totalcost * 0.08))) : Math.min(50, Math.max(5, Math.floor(totalcost * 0.06)))}</p>
+
                 <textarea
                     placeholder="overall description"
                     value={description}
@@ -358,11 +360,11 @@ export default function UpdateRequest() {
                         setaddress(e.target.value);
                     }}
                 ></textarea>
-                <label style={{display:"flex", alignItems:"center", gap:"8px", marginTop:"10px", fontWeight:"600"}}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "10px", fontWeight: "600" }}>
                     <input
                         type="checkbox"
                         checked={premiumDelivery}
-                        onChange={(e)=>setPremiumDelivery(e.target.checked)}
+                        onChange={(e) => setPremiumDelivery(e.target.checked)}
                     />
                     <span>Premium delivery</span>
                 </label>
