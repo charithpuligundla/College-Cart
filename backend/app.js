@@ -15,8 +15,9 @@ require('dotenv').config();
 const crypto = require("crypto");
 const { sendEmail } = require('./services/emailService');
 
-// const backenduri="https://college-cart-epzl.onrender.com";
-const backenduri = "http://localhost:5000";
+const backenduri="https://college-cart-epzl.onrender.com";
+
+// const backenduri = "http://localhost:5000";
 
 const app = express();
 app.use(express.json());
