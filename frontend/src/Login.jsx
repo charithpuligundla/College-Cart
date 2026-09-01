@@ -3,6 +3,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Login.css"
+import Loader from "./Loader";
 
 function Login() {
     const navigate=useNavigate();
@@ -45,6 +46,7 @@ function Login() {
     const [degree,setDegree]=useState("B.Tech");
     const [branch,setBranch]=useState("Computer Science & Engineering");
     const [year,setYear]=useState(1);
+    const [isLoading, setIsLoading] = useState(false);
     const backenduri = import.meta.env.VITE_BACKENDURI;
 
 
@@ -87,6 +89,7 @@ function Login() {
             alert("Please enter a valid phone number.");
             return;
         }
+        setIsLoading(true);
         axios.post(`${backenduri}/signup`, {
             userName: signupData.userName,
             email: signupData.email,
@@ -99,9 +102,11 @@ function Login() {
             console.log(response);
             localStorage.setItem("userId", response.data.user._id);
             localStorage.setItem("token",response.data.token);
+            setIsLoading(false);
             navigate('/home');
         })
             .catch(error => {
+                setIsLoading(false);
                 alert(error.response.data.error);
             });
     }
@@ -117,22 +122,26 @@ function Login() {
             alert("Please enter a valid Gmail address.");
             return;
         }
+        setIsLoading(true);
         axios.post(`${backenduri}/login`, {
             email: loginData.email,
             password: loginData.password
         }).then(response => {
             localStorage.setItem("userId", response.data.user._id);
             localStorage.setItem("token",response.data.token);
+            setIsLoading(false);
             navigate('/home');
         }
         )
             .catch(error => {
+                setIsLoading(false);
                 alert(error.response.data);
             });
     }
 
     return (
         <div className="login-outer-div">
+            {isLoading && <Loader />}
             <div className="login-main-div">
                 <div className={swapped ? "left-div swapped" : "left-div"}>
                     <div className="login">
