@@ -123,8 +123,7 @@ export default function Home() {
 
     return (
         <div>
-            {
-                user?.isVerified ?
+
                     <div className="home-outer-div">
                         <div className="home-top-bar">
                             <div className="title-name-div">
@@ -368,27 +367,7 @@ export default function Home() {
                                 </div>
                             }
                         </div>
-                        {/* <CountdownTimer seconds={10}/> */}
-                    </div> :
-                    <div>
-                        {
-                            user ?
-                                <div>
-                                    <p>Verify your account by clicking link sent to gmail... or sign in again</p>
-                                    <button
-                                        onClick={() => { navigate("/login"); }}
-                                    >sign in</button>
-                                </div>
-                                :
-                                <div>
-                                    <p>Sign Up first and visit this page</p>
-                                    <button
-                                        onClick={() => { navigate("/login"); }}
-                                    >sign in</button>
-                                </div>
-                        }
                     </div>
-            }
         </div>
     );
 }

@@ -366,7 +366,15 @@ export default function UpdateRequest() {
                         checked={premiumDelivery}
                         onChange={(e) => setPremiumDelivery(e.target.checked)}
                     />
-                    <span>Premium delivery</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span>Premium delivery</span>
+                        <div className="premium-info-container" style={{ position: "relative", display: "inline-flex" }}>
+                            <i className="fa-solid fa-circle-info" style={{ color: "#38bdf8", cursor: "pointer", fontSize: "16px" }}></i>
+                            <div className="premium-info-tooltip">
+                                Get faster delivery. If delivered within 1 hour, the premium fee applies; otherwise, your order remains normal.
+                            </div>
+                        </div>
+                    </div>
                 </label>
                 <div className="post-req-note-btns">
                     <button

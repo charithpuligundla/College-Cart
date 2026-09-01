@@ -201,8 +201,8 @@ export default function DocsPage() {
           <h2>Need More Help?</h2>
           <p>
             Contact our support team anytime at{" "}
-            <a href="mailto:support@collegecarrt.com">
-              support@collegecarrt.com
+            <a href="mailto:support.collegecart@gmail.com">
+              support.collegecart@gmail.com
             </a>
           </p>
         </section>

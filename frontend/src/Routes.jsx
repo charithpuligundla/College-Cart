@@ -19,7 +19,7 @@ export default function Router() {
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/addrequest" element={<ProtectedRoute><AddRequest /></ProtectedRoute>} />
         <Route path="/chat/:chatId" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
         <Route path="/myrequests" element={<ProtectedRoute><Myrequests /></ProtectedRoute>} />
