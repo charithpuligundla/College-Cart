@@ -160,6 +160,7 @@ app.post('/login', async (req, res) => {
   res.status(200).json({ message: 'login sucessful', token, user: user });
 });
 
+
 app.get("/verify-email/:token", async (req, res) => {
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
@@ -167,12 +168,49 @@ app.get("/verify-email/:token", async (req, res) => {
     await User.findByIdAndUpdate(decoded.id, {
       isVerified: true
     });
-    res.send("Email verified successfully ✅");
+
+    res.send(`
+      <html>
+        <head>
+          <title>Email Verified</title>
+        </head>
+        <body style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          font-family: Arial, sans-serif;
+          text-align: center;
+        ">
+          <h1 style="font-size: 40px; color: green;">
+            Email verified successfully ✅ you can visit site now<br>
+            You can login now
+          </h1>
+        </body>
+      </html>
+    `);
+
   } catch (err) {
-    res.status(400).send("Invalid or expired link ❌");
+    res.status(400).send(`
+      <html>
+        <body style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          font-family: Arial, sans-serif;
+          text-align: center;
+        ">
+          <h1 style="font-size: 40px; color: red;">
+            Invalid or expired link ❌
+          </h1>
+        </body>
+      </html>
+    `);
   }
 });
-
 
 app.use(protect);
 

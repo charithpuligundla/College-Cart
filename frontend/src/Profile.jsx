@@ -50,6 +50,7 @@ export default function Profile() {
                     }}
                 >☰</button>
                 <div className="right-top-div">
+                    <p onClick={() => { navigate("/home"); }}>Home</p>
                     <p
                         onClick={() => {
                             navigate("/myrequests");
@@ -74,6 +75,7 @@ export default function Profile() {
                             setshowEditblur(prev => !prev);
                         }}
                     >☰</button>
+                    <p onClick={() => { navigate("/home"); }}>Home</p>
                     <p
                         style={{
                             backgroundColor: "rgba(0, 140, 255, 1)",

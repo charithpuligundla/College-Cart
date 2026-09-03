@@ -138,6 +138,7 @@ export default function Home() {
                                 }}
                             >☰</button>
                             <div className="right-top-div">
+                                <p style={{ backgroundColor: "rgba(0, 140, 255, 1)", color: "white", padding: "5px", borderRadius: "15px" }}>Home</p>
                                 <p onClick={() => { navigate("/myrequests"); }}>Requested</p>
                                 <p onClick={() => { navigate("/mydeliveries"); }}>Accepted</p>
                                 <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>
@@ -153,6 +154,7 @@ export default function Home() {
                                     setshowEditblur(prev => !prev);
                                 }}
                             >☰</button>
+                            <p style={{ backgroundColor: "rgba(0, 140, 255, 1)", color: "white", padding: "5px", borderRadius: "15px" }}>Home</p>
                             <p onClick={() => { navigate("/myrequests"); }}>Requested</p>
                             <p onClick={() => { navigate("/mydeliveries"); }}>Accepted</p>
                             <p className="docs-p" onClick={() => { navigate("/docs"); }}>Docs</p>

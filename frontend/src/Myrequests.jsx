@@ -60,6 +60,7 @@ export default function Myrequests() {
                     }}
                 >☰</button>
                 <div className="right-top-div">
+                    <p onClick={() => { navigate("/home"); }}>Home</p>
                     <p
                         style={{
                             backgroundColor: "rgba(0, 140, 255, 1)",
@@ -88,6 +89,7 @@ export default function Myrequests() {
                         setshowEditblur(prev => !prev);
                     }}
                 >☰</button>
+                <p onClick={() => { navigate("/home"); }}>Home</p>
                 <p
                     style={{
                         backgroundColor: "rgba(0, 140, 255, 1)",

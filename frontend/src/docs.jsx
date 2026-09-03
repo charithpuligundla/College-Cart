@@ -67,6 +67,7 @@ export default function DocsPage() {
 
         {/* Desktop Navigation */}
         <div className="right-top-div">
+          <p onClick={() => navigate("/home")}>Home</p>
           <p onClick={() => navigate("/myrequests")}>Requested</p>
           <p onClick={() => navigate("/mydeliveries")}>Accepted</p>
           <p className="docs-p active-link" onClick={() => navigate("/docs")}
@@ -88,6 +89,7 @@ export default function DocsPage() {
         <button className="display-sidebar-top-btn in" onClick={toggleSidebar}>
           ☰
         </button>
+        <p onClick={() => navigate("/home")}>Home</p>
         <p onClick={() => navigate("/myrequests")}>Requested</p>
         <p onClick={() => navigate("/mydeliveries")}>Accepted</p>
         <p className="docs-p" onClick={() => navigate("/docs")}
